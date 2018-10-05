@@ -1,0 +1,7 @@
+/dictionaries
+/__pycache__
+/.idea
+README.txt
+Database_schema.md
+out.txt
+corpus.sqlite3

@@ -8,7 +8,7 @@ def make_checker():
     :return: Hunspell object h
     '''
     if platform.system() == 'Windows':
-        h = Hunspell('de-DE', hunspell_data_dir="C:\\Users\\Lena_Langholf\\Dropbox\\million_post_corpus\\dictionaries")
+        h = Hunspell('de-DE', hunspell_data_dir="C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\dictionaries")
     else:
         h = Hunspell('de-DE', hunspell_data_dir="/home/lena/Desktop/million_post_corpus/dictionaries")
     return h
