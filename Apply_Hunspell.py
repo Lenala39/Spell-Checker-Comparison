@@ -1,7 +1,8 @@
 from hunspell import Hunspell
 from copy import deepcopy
 import platform
-
+import os
+import re
 
 def make_checker():
     '''
@@ -13,24 +14,6 @@ def make_checker():
     else:
         h = Hunspell('de-DE', hunspell_data_dir="/home/lena/Desktop/million_post_corpus/dictionaries")
     return h
-
-def apply_hunspell(data):
-    '''
-    applies hunspell spell checking on a dataset
-    :param data: list of comments to be corrected
-    :return: list of corrected comments
-    '''
-    h = make_checker() # create a checker from hunspell
-
-    # if data is just the comments
-    if isinstance(data[0], str):
-        return normal_correction(data, h)
-
-    # if data is list of lists with comments + metadata
-    elif isinstance(data[0], list):
-        return metadata_correction(data, h)
-
-    return "unknown data format"
 
 def correct_word(word, h):
     '''
@@ -53,6 +36,63 @@ def correct_word(word, h):
         corrected = word # if word is correct, simply return that
 
     return corrected
+
+
+def write_file(comment, id):
+    '''
+    Writes a string into a file that uses id for its name
+    :param comment: string to write
+    :param id: file name
+    '''
+    # @Todo: write metadata?
+    filename = "Files/{}_hunspell.txt".format(id)
+    with open(filename, "w", encoding="utf-8") as file:
+        file.write(comment)
+
+def apply_hunspell_on_dir(directory):
+    '''
+    Applies hunspell on all files in a directory that are named like XX.txt
+    :param directory: directory of the files
+    '''
+
+    file_list = os.listdir(directory) #make list of all files in the directory
+    h = make_checker() # make checker
+
+    # iterate over all files
+    for i in range(len(file_list)):
+        file_pattern = re.compile("[0-9]+.txt") # make pattern to match XX.txt files
+        if re.match(file_pattern, file_list[i]): # if match
+            filename = "{}/{}".format(directory, file_list[i])
+
+            with open(filename, "r", encoding="utf-8") as file: #open the file to read
+                comment = file.read() # read the content
+                single_words = comment.split(" ") #split the string from the file
+                for j in range(len(single_words)): # apply spell check on every word
+                    single_words[j] = correct_word(single_words[j], h)
+
+                corrected_comment = " ".join(single_words) # re-join the corrected comments
+                corrected_filename = "{}/Hunspell/{}_hunspell.txt".format(directory, i+1) # make new filename
+                with open(corrected_filename, "w", encoding="utf-8") as new_file: # open new file
+                    new_file.write(corrected_comment) #write correction into new file
+
+def apply_hunspell_on_list(data):
+    '''
+    applies hunspell spell checking on a dataset
+    :param data: list of comments to be corrected
+    :return: list of corrected comments
+    '''
+    h = make_checker() # create a checker from hunspell
+
+    # if data is just the comments
+    if isinstance(data[0], str):
+        return normal_correction(data, h)
+
+    # if data is list of lists with comments + metadata
+    elif isinstance(data[0], list):
+        return metadata_correction(data, h)
+
+    return "unknown data format"
+
 
 def normal_correction(data, h):
     '''
@@ -92,8 +132,3 @@ def metadata_correction(data, h):
         corrected_data[i][7] = complete_comment # assign new corrected words to list
         write_file(complete_comment, i+1)
     return corrected_data
-
-def write_file(comment, id):
-    filename = "Files/{}_hunspell.txt".format(id)
-    with open(filename, "w", encoding="utf-8") as file:
-        file.write(comment)
