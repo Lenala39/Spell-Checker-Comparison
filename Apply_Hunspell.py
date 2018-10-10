@@ -2,6 +2,7 @@ from hunspell import Hunspell
 from copy import deepcopy
 import platform
 
+
 def make_checker():
     '''
     creates a checker depending on the system running
@@ -65,12 +66,13 @@ def normal_correction(data, h):
     single_words = []
 
     # for every comment in list of comments
-    for text in data:
-        single_words = text.split(" ") #split the text into single words
-        for i in range(len(single_words)): #iterate over single words
-            single_words[i] = correct_word(single_words[i], h) # correct each word
-        corrected_comments.append(" ".join(single_words)) # append to corrected comments
-
+    for i in range(len(data)):
+        single_words = data[i].split(" ") #split the text into single words
+        for j in range(len(single_words)): #iterate over single words
+            single_words[j] = correct_word(single_words[j], h) # correct each word
+        complete_comment = " ".join(single_words)
+        corrected_comments.append(complete_comment) # append to corrected comments
+        write_file(complete_comment, i+1)
     return corrected_comments
 
 def metadata_correction(data, h):
@@ -82,11 +84,16 @@ def metadata_correction(data, h):
     '''
 
     corrected_data = deepcopy(data) # copy data as deepcopy to keep orginal
-    for elem in corrected_data: # for every list in the dataset
-        single_words = elem[7].split(" ") # access only the comment and split at " "
-        for i in range(len(single_words)):
-            single_words[i] = correct_word(single_words[i], h) # correct each single word
-
-        elem[7] = " ".join(single_words) # assign new corrected words to list
-
+    for i in range(len(corrected_data)): # for every list in the dataset
+        single_words = corrected_data[i][7].split(" ") # access only the comment and split at " "
+        for j in range(len(single_words)):
+            single_words[j] = correct_word(single_words[j], h) # correct each single word
+        complete_comment = " ".join(single_words)
+        corrected_data[i][7] = complete_comment # assign new corrected words to list
+        write_file(complete_comment, i+1)
     return corrected_data
+
+def write_file(comment, id):
+    filename = "Files/{}_hunspell.txt".format(id)
+    with open(filename, "w", encoding="utf-8") as file:
+        file.write(comment)

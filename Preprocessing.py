@@ -6,10 +6,11 @@ def remove_special_chars(data):
     :return: list of comments (no metadata)
     '''
     new_data = []
-    for elem in data:
-        text = elem[7]
+    for i in range(len(data)):
+        text = data[i][7]
         text = replace_chars(text)
         new_data.append(text)
+        write_file(text, i+1)
     return new_data
 
 def remove_but_keep_meta(data):
@@ -24,6 +25,8 @@ def remove_but_keep_meta(data):
 
         data[i] = list(data[i])
         data[i][7] = text
+        write_file(text, i+1)
+
 
     return data
 
@@ -44,3 +47,10 @@ def replace_chars(text):
     text = text.replace(";", "")
     text = text.replace(":", "")
     return text
+
+def write_file(comment, id):
+    filename = "Files/{}.txt".format(id)
+    with open(filename, "w", encoding="utf-8") as file:
+        file.write(comment)
+
+
