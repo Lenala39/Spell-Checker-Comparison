@@ -1,4 +1,4 @@
-
+import re
 def remove_special_chars(data):
     '''
     removes special chars from comment and returns list of only comments
@@ -46,6 +46,7 @@ def replace_chars(text):
     text = text.replace(".", "")
     text = text.replace(";", "")
     text = text.replace(":", "")
+    text = re.sub(r" {2,}", " ", text) #replace more than one whitespace with a single one
     return text
 
 def write_file(comment, id):
