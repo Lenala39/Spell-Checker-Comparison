@@ -1,9 +1,9 @@
 import DB_access
 import Preprocessing
 import Apply_Hunspell
+import Reduce
 import Evaluation
 import pandas as pd
-import numpy as np
 import MatchType
 
 if __name__ == '__main__':
@@ -29,7 +29,8 @@ if __name__ == '__main__':
     original_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files"
     hunspell_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files\\Hunspell"
     word_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files\\Word"
-
+    
+    # delete the files that are unchanged or have the same change
     unchanged, sameChange = Evaluation.get_unchanged_and_sameChange(original_folder, hunspell_folder, word_folder)
     num_unchanged = len(unchanged)/3
     num_sameChange = len(sameChange)/3
@@ -65,6 +66,9 @@ if __name__ == '__main__':
     word_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files\\Word"
     gold_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files\\Word"
     pd.set_option('display.max_columns', 9)
+
+    # evaluate and compare the files
     data = Evaluation.compare_files(original_folder, hunspell_folder, word_folder, gold_folder)
-    #data.set_index("ID", inplace=True)
-    print(data)
+
+    # reduce data size
+    data = Reduce.reduce(data)

@@ -3,6 +3,7 @@ from enum import Enum
 import pandas as pd
 import numpy as np
 import MatchType
+import Levenshtein
 
 def get_unchanged_and_sameChange(original_folder, hunspell_folder, word_folder):
     '''
@@ -83,7 +84,7 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
         g_path = os.path.join(gold_folder, gold_list[i])
 
         data = pd.DataFrame(np.random.randint(low=0, high=1, size=(1, 10)),
-                            columns=["Comment-ID", "Word-ID", "Match-Type", "Original", "Gold", "Hunspell", "Word", "L1", "L2", "L3"])
+                            columns=["Comment-ID", "Word-ID", "Match-Type", "Original", "Gold", "Hunspell", "Word", "lev_hg", "lev_wg", "lev_hw"])
 
         # open the files
         with open(o_path, "r") as original_file:
@@ -103,26 +104,44 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
                         g_words = g_content.split(" ")
 
                         type = ""
-
+                        lev_hg = 0
+                        lev_wg = 0
+                        lev_hw = 0
                         for j in range(len(h_words)):
                             #id = str(i+1) + "." + str(j)
                             if g_words[j] == h_words[j]:
                                 if g_words[j] == w_words[j]:
                                     # both correct
                                     type = MatchType.MatchType(0)
+                                    # all Levenshteins are 0
+                                    lev_hg = 0
+                                    lev_wg = 0
+                                    lev_hw = 0
                                 elif g_words[j] != w_words[j]:
                                     # only hun correct
                                     type = MatchType.MatchType(1)
+                                    lev_hg = Levenshtein.distance(g_words[i], h_words[i])
+                                    lev_wg = Levenshtein.distance(g_words[i], w_words[i])
+                                    lev_hw = Levenshtein.distance(g_words[i], h_words[i])
                             elif g_words[j] == w_words[j]:
                                 # only word correct
                                 type = MatchType.MatchType(2)
+                                lev_hg = Levenshtein.distance(g_words[j], h_words[j])
+                                lev_wg = Levenshtein.distance(g_words[j], w_words[j])
+                                lev_hw = Levenshtein.distance(g_words[j], h_words[j])
                             else:
                                 if w_words[j] == h_words[j]:
                                     # both false, but same
                                     type = MatchType.MatchType(3)
+                                    lev_hg = Levenshtein.distance(g_words[j], h_words[j])
+                                    lev_wg = Levenshtein.distance(g_words[j], w_words[j])
+                                    lev_hw = Levenshtein.distance(g_words[j], h_words[j])
                                 else:
                                     # both false but different
                                     type = MatchType.MatchType(4)
+                                    lev_hg = Levenshtein.distance(g_words[j], h_words[j])
+                                    lev_wg = Levenshtein.distance(g_words[j], w_words[j])
+                                    lev_hw = Levenshtein.distance(g_words[j], h_words[j])
 
                             test_dict = {"Comment-ID": i+1,
                                          "Word-ID": j,
@@ -131,9 +150,9 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
                                          "Gold": g_words[j],
                                          "Hunspell": h_words[j],
                                          "Word": w_words[j],
-                                         "Lev1": 0,
-                                         "Lev2": 0,
-                                         "Lev3": 0 }
+                                         "lev_hg": lev_hg,
+                                         "lev_wg": lev_wg,
+                                         "lev_hw": lev_hw }
 
                             one_word = pd.Series(test_dict)
                             data.loc[j] = one_word
