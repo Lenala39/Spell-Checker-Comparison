@@ -1,6 +1,11 @@
 import pandas as pd
 
 def mem_usage(pandas_obj):
+    '''
+    prints mem usage nicely
+    :param pandas_obj:
+    :return:
+    '''
     if isinstance(pandas_obj, pd.DataFrame):
         usage_b = pandas_obj.memory_usage(deep=True).sum()
     else:  # we assume if not a df it's a series
@@ -22,18 +27,33 @@ def reduce_int(data):
 
 def reduce_matchType(data):
     '''
-    gl_obj = data.select_dtypes(include=['object']).copy()
-    gl_obj.describe()
-
-    dow = gl_obj["Match-Type"]
-    print(Reduce.mem_usage(dow))
-    dow_cat = dow.astype('category')
-    print(Reduce.mem_usage(dow_cat))
+    reduces size by making Match-Type column a category
+    :param data:
+    :return:
     '''
     data["Match-Type"] = data["Match-Type"].astype("category")
     return data
 
 def reduce(data):
+    '''
+    reduces the size of the DataFrame by using uints and category-types
+    :param data: big DataFrame
+    :return: reduced DataFrame
+    '''
     data = reduce_matchType(data)
     data = reduce_int(data)
+    return data
+
+
+def custom_csv(csv_file):
+    '''
+    imports a csv file and already assigns correct dtypes for reduced size
+    :param csv_file: path to csv
+    :return: DataFrame
+    '''
+    column_names = ['Comment-ID', 'Word-ID', 'Match-Type', 'Original', 'Gold', 'Hunspell',
+                    'Word', 'lev_hg', 'lev_wg', 'lev_hw']
+    dtypes = ['uint8', 'uint8', 'category', 'object', 'object', 'object', 'object', 'uint8', 'uint8', 'uint8']
+    column_types = dict(zip(column_names, dtypes))
+    data = pd.read_csv(csv_file, dtype=column_types)
     return data

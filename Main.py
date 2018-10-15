@@ -72,3 +72,9 @@ if __name__ == '__main__':
 
     # reduce data size
     data = Reduce.reduce(data)
+
+    #write data to csv
+    data.to_csv("data.csv", sep=",")
+
+    # read from csv but using types and cols we want
+    data2 = Reduce.custom_csv("data.csv")
