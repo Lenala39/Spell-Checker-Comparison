@@ -54,6 +54,18 @@ def get_unchanged_and_sameChange(original_folder, hunspell_folder, word_folder):
                         to_delete_sameChange.append(h_path)
                         to_delete_sameChange.append(w_path)
                         deleted_indices_sameChange.append(i)
+
+    # write a file with the indices of the files that were deleted
+    # a) because they were unchanged
+    with open("Results/unchanged.txt", "a", encoding="utf-8") as unchanged_indices:
+        for elem in deleted_indices_unchanged:
+            unchanged_indices.write(elem)
+
+    # b) because they contained the same change
+    with open("Results/sameChange.txt", "a", encoding="utf-8") as sameChange_indices:
+        for elem in deleted_indices_sameChange:
+            sameChange_indices.write(elem)
+
     return to_delete_unchanged, to_delete_sameChange
 
 
@@ -158,3 +170,6 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
                             data.loc[j] = one_word
 
     return data
+
+def return_correct(data):
+    pass
