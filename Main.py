@@ -44,7 +44,7 @@ if __name__ == '__main__':
     '''
 
 
-    pd.set_option('display.max_columns', 9)
+    pd.set_option('display.max_columns', 10)
 
     # evaluate and compare the files
     data = Evaluation.compare_files(original_folder, hunspell_folder, word_folder, gold_folder)
@@ -53,7 +53,20 @@ if __name__ == '__main__':
     data = Reduce.reduce(data)
 
     #write data to csv
-    data.to_csv("data.csv", sep=",")
+    #data.to_csv("data.csv", sep=",", index=False)
 
     # read from csv but using types and cols we want
     data2 = Reduce.custom_csv("data.csv")
+    #print(data2[data2["lev_hg"] != 0])
+    #print(data2[data2["Match-Type"] != 0])
+
+    true_pos = Evaluation.get_truePos(data, "hun")
+    true_neg = Evaluation.get_trueNeg(data, "hun")
+    false_pos = Evaluation.get_falsePos(data, "hun")
+    false_neg = Evaluation.get_falseNeg(data, "hun")
+
+
+    recall = Evaluation.calculate_recall(data, "hun")
+    print("recall", recall)
+    precision = Evaluation.calculate_precision(data, "hun")
+    print("precision", precision)

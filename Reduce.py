@@ -40,7 +40,7 @@ def reduce(data):
     :param data: big DataFrame
     :return: reduced DataFrame
     '''
-    data = reduce_matchType(data)
+    #data = reduce_matchType(data)
     data = reduce_int(data)
     return data
 
@@ -51,9 +51,8 @@ def custom_csv(csv_file):
     :param csv_file: path to csv
     :return: DataFrame
     '''
-    column_names = ['Comment-ID', 'Word-ID', 'Match-Type', 'Original', 'Gold', 'Hunspell',
-                    'Word', 'lev_hg', 'lev_wg', 'lev_hw']
-    dtypes = ['uint8', 'uint8', 'category', 'object', 'object', 'object', 'object', 'uint8', 'uint8', 'uint8']
+    column_names = ['Comment-ID', 'Word-ID', 'Match-Type', 'Original', 'Gold', 'Hunspell', 'Word', 'lev_hg', 'lev_wg', 'lev_hw', 'lev_og']
+    dtypes = ['uint8', 'uint8', 'uint8', 'object', 'object', 'object', 'object', 'uint8', 'uint8', 'uint8', 'uint8']
     column_types = dict(zip(column_names, dtypes))
     data = pd.read_csv(csv_file, dtype=column_types)
     return data
