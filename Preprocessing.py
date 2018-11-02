@@ -8,9 +8,10 @@ def remove_special_chars(data):
     new_data = []
     for i in range(len(data)):
         text = data[i][7]
-        text = replace_chars(text)
-        new_data.append(text)
-        write_file(text, i+1)
+        if text is not None:
+            text = replace_chars(text)
+            new_data.append(text)
+            write_file(text, data[i][0])
     return new_data
 
 def remove_but_keep_meta(data):
@@ -21,11 +22,14 @@ def remove_but_keep_meta(data):
     '''
     for i in range(len(data)):
         text = data[i][7]
-        text = replace_chars(text)
+        if text is None:
+            pass
+        else:
+            text = replace_chars(text)
 
         data[i] = list(data[i])
         data[i][7] = text
-        write_file(text, i+1)
+        write_file(text, data[i][0])
 
 
     return data

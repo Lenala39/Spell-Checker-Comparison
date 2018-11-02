@@ -12,24 +12,17 @@ if __name__ == '__main__':
     word_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files\\Word"
     gold_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files\\Word"
 
-
-
-    '''
     # get data from database
-    data = DB_access.access_corpus(5)
+    data = DB_access.access_corpus(50)
 
     # process data and remove special chars
     processed_data = Preprocessing.remove_special_chars(data)
-    #processed_data2 = Preprocessing.remove_but_keep_meta(data)
 
     # apply spellchecking
-    Apply_Hunspell.apply_hunspell_on_dir("Files")
+    #Apply_Hunspell.apply_hunspell_on_dir("Files")
+    pd.set_option('display.max_columns', 10)
 
-    for i in range(len(processed_data2)):
-        print("Original: ", processed_data2[i][7])
-        print("Corrected: ", applied_data2[i][7])
-        print("Other corrected version", applied_data[i])
-
+    '''
     
     # delete the files that are unchanged or have the same change
     unchanged, sameChange = Evaluation.get_unchanged_and_sameChange(original_folder, hunspell_folder, word_folder)
@@ -40,12 +33,7 @@ if __name__ == '__main__':
 
     Evaluation.delete_files(sameChange, "same Change")
     Evaluation.delete_files(unchanged, "unchanged")
-    
-    '''
-
-
-    pd.set_option('display.max_columns', 10)
-
+ 
     # evaluate and compare the files
     data = Evaluation.compare_files(original_folder, hunspell_folder, word_folder, gold_folder)
 
@@ -59,7 +47,7 @@ if __name__ == '__main__':
     data2 = Reduce.custom_csv("data.csv")
     #print(data2[data2["lev_hg"] != 0])
     #print(data2[data2["Match-Type"] != 0])
-    '''
+    
     true_pos = Evaluation.get_truePos(data, "hun")
     true_neg = Evaluation.get_trueNeg(data, "hun")
     false_pos = Evaluation.get_falsePos(data, "hun")
@@ -80,5 +68,6 @@ if __name__ == '__main__':
     hun_percent_false = Evaluation.get_percentFalse(data, "hun")
     print(word_percent_false)
     print(hun_percent_false)
-    '''
+    
     Evaluation.write_evalFile(data2)
+    '''
