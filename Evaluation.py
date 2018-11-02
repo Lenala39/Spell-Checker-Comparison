@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import MatchType
 import Levenshtein
-
+import json
 def get_unchanged_and_sameChange(original_folder, hunspell_folder, word_folder):
     '''
     removes the files that have the same content (are unchanged) in all three folders
@@ -177,12 +177,6 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
 
     return data
 
-def calculate_precision(data):
-    pass
-
-def calculate_recall(data):
-    pass
-
 def get_truePos(data, checker):
     '''
     returns a dataframe containing all true positive corrections
@@ -286,17 +280,124 @@ def get_correctWords(data, checker):
 def calculate_recall(data, checker):
     true_pos = get_truePos(data, checker)
     false_pos = get_falsePos(data, checker)
-    print(len(true_pos.index))
-    print(len(false_pos.index))
-    recall = len(true_pos.index) / (len(true_pos.index) + len(false_pos.index))
+    try:
+        recall = len(true_pos.index) / (len(true_pos.index) + len(false_pos.index))
+    except ZeroDivisionError:
+        recall = 0
     return recall
 
 def calculate_precision(data, checker):
     true_pos = get_truePos(data, checker)
     false_neg = get_falseNeg(data, checker)
 
-    print(len(true_pos.index))
-    print(len(false_neg.index))
-
-    precision = len(true_pos.index) / (len(true_pos.index) + len(false_neg.index))
+    try:
+        precision = len(true_pos.index) / (len(true_pos.index) + len(false_neg.index))
+    except ZeroDivisionError:
+        precision = 0
     return precision
+
+def get_percentCorrect(data, checker):
+    correct_entries = data[data["Match-Type"] == 0]
+    all_data_size = len(data.index)
+    if checker == "word":
+        only_word = data[data["Match-Type"] == 2]
+        correct_entries = correct_entries.append(only_word)
+    elif checker == "hun":
+        correct_entries = correct_entries.append(data[data["Match-Type"] == 1])
+    else:
+        print("please enter a valid checker name to get percent correct")
+
+    correct_entries_size = len(correct_entries.index)
+    percent_correct = (correct_entries_size / all_data_size) * 100
+    return round(percent_correct,2)
+
+def get_percentFalse(data, checker):
+    false_entries = data[data["Match-Type"] == 3]
+    false_entries.append(data[data["Match-Type"] == 4])
+    all_data_size = len(data.index)
+    if checker == "word":
+        false_entries = false_entries.append(data[data["Match-Type"] == 1])
+    elif checker == "hun":
+        false_entries = false_entries.append(data[data["Match-Type"] == 2])
+    else:
+        print("please enter a valid checker name to get percent false")
+
+    false_entries_size = len(false_entries.index)
+    percent_false = (false_entries_size / all_data_size) * 100
+    return round(percent_false, 2)
+
+def calculate_FScore(data, checker):
+    # https://en.wikipedia.org/wiki/Precision_and_recall
+    recall = calculate_recall(data, checker)
+    precision = calculate_precision(data, checker)
+    try:
+        f_score = 2 * ((precision * recall) / (precision + recall))
+    except ZeroDivisionError:
+        f_score = 0
+    return round(f_score,2)
+
+def calculate_Accuracy(data, checker):
+    true_pos = get_truePos(data, checker)
+    true_neg = get_trueNeg(data, checker)
+
+    all_size = len(data.index)
+    true_pos_size = len(true_pos.index)
+    true_neg_size = len(true_neg.index)
+
+    accuracy = (true_pos_size + true_neg_size) / all_size
+    return round(accuracy,2)
+
+
+def calculate_Specificity(data, checker):
+    # https://en.wikipedia.org/wiki/Sensitivity_and_specificity#Specificity
+    # Specificity relates to the test's ability to correctly reject healthy patients without a condition
+    # -> correctly reject words that are spelled right
+    # true_neg / true_neg + false_pos
+
+    true_neg = get_trueNeg(data, checker)
+    false_pos = get_falsePos(data, checker)
+    try:
+        specificity = len(true_neg.index) / (len(true_neg.index) + len(false_pos.index))
+    except ZeroDivisionError:
+        specificity = 0
+    return round(specificity,2)
+
+def write_evalFile(data):
+    word_percentCorrect = get_percentCorrect(data, "word")
+    hun_percentCorrect = get_percentCorrect(data, "hun")
+
+    word_percentFalse = get_percentFalse(data, "word")
+    hun_percentFalse = get_percentFalse(data, "hun")
+
+    word_precision = calculate_precision(data, "word")
+    hun_precision = calculate_precision(data, "hun")
+
+    word_recall = calculate_recall(data, "word")
+    hun_recall = calculate_recall(data, "hun")
+
+    word_fscore = calculate_FScore(data, "word")
+    hun_fscore = calculate_FScore(data, "hun")
+
+    word_accuracy = calculate_Accuracy(data, "word")
+    hun_accuracy = calculate_Accuracy(data, "hun")
+
+    word_specificity = calculate_Specificity(data, "word")
+    hun_specificity = calculate_Specificity(data, "hun")
+
+    output_dict = {"Word_Percent_correct" : word_percentCorrect,
+                   "Hun_Percent_correct": hun_percentCorrect,
+                   "Word_Percent_false": word_percentFalse,
+                   "Hun_Percent_false": hun_percentFalse,
+                   "Word_Precision": word_precision,
+                   "Hun_Precision": hun_precision,
+                   "Word_Recall": word_recall,
+                   "Hun_Recall": hun_recall,
+                   "Word_Fscore": word_fscore,
+                   "Hun_Fscore": hun_fscore,
+                   "Word_accuracy": word_accuracy,
+                   "Hun_accuracy": hun_accuracy,
+                   "Word_specificity": word_specificity,
+                   "Hun_specificity": hun_specificity,
+                   }
+    with open("results.txt", "w") as file:
+        file.write(json.dumps(output_dict,  indent=4))

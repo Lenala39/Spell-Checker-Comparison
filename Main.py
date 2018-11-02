@@ -59,7 +59,7 @@ if __name__ == '__main__':
     data2 = Reduce.custom_csv("data.csv")
     #print(data2[data2["lev_hg"] != 0])
     #print(data2[data2["Match-Type"] != 0])
-
+    '''
     true_pos = Evaluation.get_truePos(data, "hun")
     true_neg = Evaluation.get_trueNeg(data, "hun")
     false_pos = Evaluation.get_falsePos(data, "hun")
@@ -70,3 +70,15 @@ if __name__ == '__main__':
     print("recall", recall)
     precision = Evaluation.calculate_precision(data, "hun")
     print("precision", precision)
+
+    word_percent_correct = Evaluation.get_percentCorrect(data, "word")
+    hun_percent_correct = Evaluation.get_percentCorrect(data, "hun")
+    print(word_percent_correct)
+    print(hun_percent_correct)
+
+    word_percent_false = Evaluation.get_percentFalse(data, "word")
+    hun_percent_false = Evaluation.get_percentFalse(data, "hun")
+    print(word_percent_false)
+    print(hun_percent_false)
+    '''
+    Evaluation.write_evalFile(data2)
