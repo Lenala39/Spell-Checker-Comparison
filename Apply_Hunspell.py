@@ -57,7 +57,6 @@ def apply_hunspell_on_dir(directory):
 
     file_list = os.listdir(directory) #make list of all files in the directory
     h = make_checker() # make checker
-
     # iterate over all files
     for i in range(len(file_list)):
         file_pattern = re.compile("[0-9]+.txt") # make pattern to match XX.txt files
@@ -71,9 +70,11 @@ def apply_hunspell_on_dir(directory):
                     single_words[j] = correct_word(single_words[j], h)
 
                 corrected_comment = " ".join(single_words) # re-join the corrected comments
-                corrected_filename = "{}/Hunspell/{}_hunspell.txt".format(directory, i+1) # make new filename
+                file_index = file_list[i].split(".")[0]
+                corrected_filename = "{}/Hunspell/{}_hunspell.txt".format(directory, file_index) # make new filename
                 with open(corrected_filename, "w", encoding="utf-8") as new_file: # open new file
                     new_file.write(corrected_comment) #write correction into new file
+    print("Applying Hunspell - Done!")
 
 def apply_hunspell_on_list(data):
     '''

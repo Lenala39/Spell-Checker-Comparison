@@ -13,13 +13,14 @@ if __name__ == '__main__':
     gold_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files\\Word"
 
     # get data from database
-    data = DB_access.access_corpus(50)
+    #data = DB_access.access_corpus(50)
 
     # process data and remove special chars
-    processed_data = Preprocessing.remove_special_chars(data)
+    # writes comments into individual files
+    #processed_data = Preprocessing.remove_special_chars(data)
 
     # apply spellchecking
-    #Apply_Hunspell.apply_hunspell_on_dir("Files")
+    Apply_Hunspell.apply_hunspell_on_dir("C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files")
     pd.set_option('display.max_columns', 10)
 
     '''

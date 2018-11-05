@@ -24,7 +24,7 @@ def access_corpus(num_posts):
             new_data = c.fetchall()
             data.extend(new_data) # extend data with next comments
             empty_comments, to_be_deleted = check_for_empty_comments(data) # check for empty comments
-
+    print("Accessing Database - Done!")
     return data
 
 def check_for_empty_comments(data):

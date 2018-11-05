@@ -12,6 +12,7 @@ def remove_special_chars(data):
             text = replace_chars(text)
             new_data.append(text)
             write_file(text, data[i][0])
+    print("Removing special characters - Done!")
     return new_data
 
 def remove_but_keep_meta(data):
@@ -31,7 +32,7 @@ def remove_but_keep_meta(data):
         data[i][7] = text
         write_file(text, data[i][0])
 
-
+    print("Removing special characters (keep metadata) - Done!")
     return data
 
 def replace_chars(text):
