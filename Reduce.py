@@ -56,3 +56,4 @@ def custom_csv(csv_file):
     column_types = dict(zip(column_names, dtypes))
     data = pd.read_csv(csv_file, dtype=column_types)
     return data
+

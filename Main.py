@@ -34,41 +34,41 @@ if __name__ == '__main__':
 
     Evaluation.delete_files(sameChange, "same Change")
     Evaluation.delete_files(unchanged, "unchanged")
- 
+    
+    '''
     # evaluate and compare the files
     data = Evaluation.compare_files(original_folder, hunspell_folder, word_folder, gold_folder)
 
+    # drop duplicate rows (want unique items)
+    data_unique = data.drop_duplicates(keep="first", inplace=False)
+
+    '''
     # reduce data size
-    data = Reduce.reduce(data)
+    data_unique = Reduce.reduce(data)
 
     #write data to csv
-    #data.to_csv("data.csv", sep=",", index=False)
+    #data_unique.to_csv("data.csv", sep=",", index=False)
 
-    # read from csv but using types and cols we want
-    data2 = Reduce.custom_csv("data.csv")
-    #print(data2[data2["lev_hg"] != 0])
-    #print(data2[data2["Match-Type"] != 0])
-    
-    true_pos = Evaluation.get_truePos(data, "hun")
-    true_neg = Evaluation.get_trueNeg(data, "hun")
-    false_pos = Evaluation.get_falsePos(data, "hun")
-    false_neg = Evaluation.get_falseNeg(data, "hun")
+    true_pos = Evaluation.get_truePos(data_unique, "hun")
+    true_neg = Evaluation.get_trueNeg(data_unique, "hun")
+    false_pos = Evaluation.get_falsePos(data_unique, "hun")
+    false_neg = Evaluation.get_falseNeg(data_unique, "hun")
 
 
-    recall = Evaluation.calculate_recall(data, "hun")
+    recall = Evaluation.calculate_recall(data_unique, "hun")
     print("recall", recall)
-    precision = Evaluation.calculate_precision(data, "hun")
+    precision = Evaluation.calculate_precision(data_unique, "hun")
     print("precision", precision)
 
-    word_percent_correct = Evaluation.get_percentCorrect(data, "word")
-    hun_percent_correct = Evaluation.get_percentCorrect(data, "hun")
+    word_percent_correct = Evaluation.get_percentCorrect(data_unique, "word")
+    hun_percent_correct = Evaluation.get_percentCorrect(data_unique, "hun")
     print(word_percent_correct)
     print(hun_percent_correct)
 
-    word_percent_false = Evaluation.get_percentFalse(data, "word")
-    hun_percent_false = Evaluation.get_percentFalse(data, "hun")
+    word_percent_false = Evaluation.get_percentFalse(data_unique, "word")
+    hun_percent_false = Evaluation.get_percentFalse(data_unique, "hun")
     print(word_percent_false)
     print(hun_percent_false)
     
-    Evaluation.write_evalFile(data2)
+    Evaluation.write_evalFile(data_unique)
     '''

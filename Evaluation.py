@@ -73,8 +73,12 @@ def delete_files(path_list, status="none"):
     # iterate over all file(paths) in to_delete and delete the files
     if len(path_list) is 0:
         print("no files to delete because of: ", status)
+        with open("results.txt", "a") as outfile:
+            outfile.write("No files delelted because of: %s".format(status))
     else:
         print("deleted because: ", status)
+        with open("results.txt", "a") as outfile:
+            outfile.write("%d deleted because of: %s".format(len(path_list)/3, status))
         for path in path_list:
             print("deleting: ", path)
             os.unlink(path)
@@ -242,7 +246,13 @@ def get_falseNeg(data, checker):
     return false_neg
 
 def get_falseWords(data, checker):
-    # get all words that are false
+    '''
+    return all words that are false
+    :param data: whole set of words
+    :param checker: checker that should be evaluated
+    :return: data with all false words
+    '''
+
     false_data = data[data["Match-Type"] == 3]     # false but the same
     false_data.append(data[data["Match-Type"] == 4])    # false but different
 
@@ -278,15 +288,29 @@ def get_correctWords(data, checker):
     return correctData
 
 def calculate_recall(data, checker):
+    '''
+    Calculate recall of the dataset
+    :param data: dataset
+    :param checker: checker to evaluate
+    :return: rounded recall (2 digits)
+    '''
+
     true_pos = get_truePos(data, checker)
     false_pos = get_falsePos(data, checker)
     try:
         recall = len(true_pos.index) / (len(true_pos.index) + len(false_pos.index))
     except ZeroDivisionError:
         recall = 0
-    return recall
+    return round(recall, 2)
 
 def calculate_precision(data, checker):
+    '''
+    calculate precision of the dataset
+    :param data: dataset
+    :param checker: checker to evaluate
+    :return: rounded precision
+    '''
+
     true_pos = get_truePos(data, checker)
     false_neg = get_falseNeg(data, checker)
 
@@ -294,31 +318,49 @@ def calculate_precision(data, checker):
         precision = len(true_pos.index) / (len(true_pos.index) + len(false_neg.index))
     except ZeroDivisionError:
         precision = 0
-    return precision
+    return round(precision, 2)
 
 def get_percentCorrect(data, checker):
+    '''
+    Calculate the % of correct edits done by the checker
+    :param data: dataset
+    :param checker: checker to evaluate
+    :return: % correct, rounded to two digits
+    '''
+
+    # get entries that are corrected right by both checker
     correct_entries = data[data["Match-Type"] == 0]
     all_data_size = len(data.index)
+
     if checker == "word":
-        only_word = data[data["Match-Type"] == 2]
+        only_word = data[data["Match-Type"] == 2] # append word_correct rows
         correct_entries = correct_entries.append(only_word)
     elif checker == "hun":
-        correct_entries = correct_entries.append(data[data["Match-Type"] == 1])
+        correct_entries = correct_entries.append(data[data["Match-Type"] == 1]) # append hun_correct rows
     else:
         print("please enter a valid checker name to get percent correct")
 
+    # calculate %
     correct_entries_size = len(correct_entries.index)
     percent_correct = (correct_entries_size / all_data_size) * 100
     return round(percent_correct,2)
 
 def get_percentFalse(data, checker):
+    '''
+    Calculate the % of false matches
+    :param data: dataset
+    :param checker: checker to evaluate
+    :return: % false
+    '''
+    # get all entries that are false (both or different)
     false_entries = data[data["Match-Type"] == 3]
     false_entries.append(data[data["Match-Type"] == 4])
     all_data_size = len(data.index)
+
     if checker == "word":
-        false_entries = false_entries.append(data[data["Match-Type"] == 1])
+        false_entries = false_entries.append(data[data["Match-Type"] == 1]) #append all hun_correct
     elif checker == "hun":
-        false_entries = false_entries.append(data[data["Match-Type"] == 2])
+        false_entries = false_entries.append(data[data["Match-Type"] == 2]) #append all word_correct
     else:
         print("please enter a valid checker name to get percent false")
 
@@ -328,6 +370,13 @@ def get_percentFalse(data, checker):
 
 def calculate_FScore(data, checker):
     # https://en.wikipedia.org/wiki/Precision_and_recall
+    '''
+    calculate the fscore
+    :param data: dataset
+    :param checker: checker to evaluate
+    :return: rounded FSCore
+    '''
+
     recall = calculate_recall(data, checker)
     precision = calculate_precision(data, checker)
     try:
@@ -337,6 +386,14 @@ def calculate_FScore(data, checker):
     return round(f_score,2)
 
 def calculate_Accuracy(data, checker):
+    '''
+    calculate Accuracy of the checker
+    correct items (true_neg as well) / all_items
+    :param data: dataset
+    :param checker: checker
+    :return: rounded Accuracy
+    '''
+
     true_pos = get_truePos(data, checker)
     true_neg = get_trueNeg(data, checker)
 
@@ -349,10 +406,15 @@ def calculate_Accuracy(data, checker):
 
 
 def calculate_Specificity(data, checker):
-    # https://en.wikipedia.org/wiki/Sensitivity_and_specificity#Specificity
-    # Specificity relates to the test's ability to correctly reject healthy patients without a condition
-    # -> correctly reject words that are spelled right
-    # true_neg / true_neg + false_pos
+    '''
+    https://en.wikipedia.org/wiki/Sensitivity_and_specificity#Specificity
+    Specificity relates to the test's ability to correctly reject healthy patients without a condition
+    -> correctly reject words that are spelled right
+    true_neg / true_neg + false_pos
+    :param data: dataset
+    :param checker: checker to evaluate
+    :return: rounded specificity
+    '''
 
     true_neg = get_trueNeg(data, checker)
     false_pos = get_falsePos(data, checker)
@@ -363,6 +425,12 @@ def calculate_Specificity(data, checker):
     return round(specificity,2)
 
 def write_evalFile(data):
+    '''
+    writes the evaluation file as text-file (results.txt)
+    :param data: dataset
+    '''
+
+    # get all evaluation measurements
     word_percentCorrect = get_percentCorrect(data, "word")
     hun_percentCorrect = get_percentCorrect(data, "hun")
 
@@ -384,6 +452,7 @@ def write_evalFile(data):
     word_specificity = calculate_Specificity(data, "word")
     hun_specificity = calculate_Specificity(data, "hun")
 
+    # write all elements into dict
     output_dict = {"Word_Percent_correct" : word_percentCorrect,
                    "Hun_Percent_correct": hun_percentCorrect,
                    "Word_Percent_false": word_percentFalse,
@@ -399,5 +468,6 @@ def write_evalFile(data):
                    "Word_specificity": word_specificity,
                    "Hun_specificity": hun_specificity,
                    }
+    # open eval file
     with open("results.txt", "w") as file:
         file.write(json.dumps(output_dict,  indent=4))
