@@ -41,21 +41,22 @@ def replace_chars(text):
     param: text string
     returns: text string with removed chars
     '''
-    text = text.replace("=\r\n", "")
-    text = text.replace("\r", "")
+    text = text.replace("=\r\n", " ")
+    text = text.replace("\r", " ")
     text = text.replace("\n", " ")
-    text = text.replace("(", "").replace(")", "")
-    text = text.replace(",", "")
-    text = text.replace("!", "")
-    text = text.replace("?", "")
-    text = text.replace(".", "")
-    text = text.replace(";", "")
-    text = text.replace(":", "")
+    text = text.replace("(", " ").replace(")", " ")
+    text = text.replace(",", " ")
+    text = text.replace("!", " ")
+    text = text.replace("?", " ")
+    text = text.replace(".", " ")
+    text = text.replace(";", " ")
+    text = text.replace(":", " ")
     text = re.sub(r" {2,}", " ", text) #replace more than one whitespace with a single one
+    text = text.strip() # remove whitespaces from the beginning of the comment
     return text
 
 def write_file(comment, id):
-    filename = "Files/{}.txt".format(id)
+    filename = "Many_Files/{}.txt".format(id)
     with open(filename, "w", encoding="utf-8") as file:
         file.write(comment)
 

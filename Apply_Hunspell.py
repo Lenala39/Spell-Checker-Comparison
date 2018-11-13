@@ -3,6 +3,7 @@ from copy import deepcopy
 import platform
 import os
 import re
+import datetime
 
 def make_checker():
     '''
@@ -10,9 +11,9 @@ def make_checker():
     :return: Hunspell object h
     '''
     if platform.system() == 'Windows':
-        h = Hunspell('de-DE', hunspell_data_dir="C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\dictionaries")
+        h = Hunspell('de_DE_frami', hunspell_data_dir="C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\dictionaries")
     else:
-        h = Hunspell('de-DE', hunspell_data_dir="/home/lena/Desktop/million_post_corpus/dictionaries")
+        h = Hunspell('de_DE_frami', hunspell_data_dir="/home/lena/Desktop/million_post_corpus/dictionaries")
     return h
 
 def correct_word(word, h):
@@ -56,9 +57,14 @@ def apply_hunspell_on_dir(directory):
     '''
 
     file_list = os.listdir(directory) #make list of all files in the directory
+    dir_size = len(file_list) #get size of directory
     h = make_checker() # make checker
     # iterate over all files
     for i in range(len(file_list)):
+        # print occasional status update
+        if i % 50 is 0:
+            print("Applying Hunspell: {}% done".format(round(i/dir_size * 100, 0)) )
+
         file_pattern = re.compile("[0-9]+.txt") # make pattern to match XX.txt files
         if re.match(file_pattern, file_list[i]): # if match
             filename = "{}/{}".format(directory, file_list[i])
@@ -74,6 +80,7 @@ def apply_hunspell_on_dir(directory):
                 corrected_filename = "{}/Hunspell/{}_hunspell.txt".format(directory, file_index) # make new filename
                 with open(corrected_filename, "w", encoding="utf-8") as new_file: # open new file
                     new_file.write(corrected_comment) #write correction into new file
+
     print("Applying Hunspell - Done!")
 
 def apply_hunspell_on_list(data):
