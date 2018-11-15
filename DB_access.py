@@ -15,12 +15,15 @@ def access_corpus(num_posts):
 
     # CHECK FOR EMPTY COMMENTS AND SUBSTITUTE THEM
     empty_comments, to_be_deleted = check_for_empty_comments(data)
+    total_empty_comments = 0
     # while some comments are empty
     while empty_comments is not 0:
+            total_empty_comments = total_empty_comments + empty_comments
             data = delete_empty_comments(data, to_be_deleted) #delete comments
-            next_upperbound = num_posts + empty_comments #make next upper boundary
+            next_upperbound = num_posts + total_empty_comments + len(to_be_deleted) - 1 #make next upper boundary
+            next_lowerbound = num_posts + total_empty_comments # make next lower bound
             # select comments that have a higher ID than num_posts, but smaller than upper bound
-            c.execute("SELECT * FROM Posts WHERE ID_POST > ? AND ID_POST <=?", (num_posts, next_upperbound,))
+            c.execute("SELECT * FROM Posts WHERE ID_POST >= ? AND ID_POST <=?", (next_lowerbound, next_upperbound,))
             new_data = c.fetchall()
             data.extend(new_data) # extend data with next comments
             empty_comments, to_be_deleted = check_for_empty_comments(data) # check for empty comments

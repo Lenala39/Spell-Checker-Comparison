@@ -1,89 +1,10 @@
+import csv
 import os
-from enum import Enum
+import Levenshtein
 import pandas as pd
 import numpy as np
+
 import MatchType
-import Levenshtein
-import json
-import csv
-def get_unchanged_and_sameChange(original_folder, hunspell_folder, word_folder):
-    '''
-    removes the files that have the same content (are unchanged) in all three folders
-    :param original_folder: folder with the extracted comments from db
-    :param hunspell_folder: files processed by hunspell
-    :param word_folder: files processed by word
-    :return: lists of files that are unchanged or word and hunspell made the same change
-    '''
-
-    #create lists of all files in the folders (for original need to filter out subdirs
-    original_list = [f for f in os.listdir(original_folder) if os.path.isfile(os.path.join(original_folder, f))]
-    hunspell_list = os.listdir(hunspell_folder)
-    word_list = os.listdir(word_folder)
-
-    # create lists to store the files to be deleted in/the deleted indices
-    to_delete_unchanged = []
-    to_delete_sameChange = []
-    deleted_indices_unchanged = []
-    deleted_indices_sameChange = []
-
-    # iterate over all files in the respective lists
-    for i in range(len(hunspell_list)):
-        #create a path for all of the files
-        o_path = os.path.join(original_folder, original_list[i])
-        h_path = os.path.join(hunspell_folder, hunspell_list[i])
-        w_path = os.path.join(word_folder, word_list[i])
-
-        # open the files
-        with open(o_path, "r") as original_file:
-            with open(h_path, "r") as hunspell_file:
-                with open(w_path, "r") as word_file:
-
-                    # read the content of the files
-                    o_content = original_file.read()
-                    h_content = hunspell_file.read()
-                    w_content = word_file.read()
-
-                    # if the content matches for all three files
-                    if o_content == h_content and h_content == w_content:
-                        # append all file(paths) to the to_delete list and the current index to deleted_indeces
-                        to_delete_unchanged.append(o_path)
-                        to_delete_unchanged.append(h_path)
-                        to_delete_unchanged.append(w_path)
-                        deleted_indices_unchanged.append(i)
-                    elif h_content == w_content and o_content != h_content:
-                        to_delete_sameChange.append(o_path)
-                        to_delete_sameChange.append(h_path)
-                        to_delete_sameChange.append(w_path)
-                        deleted_indices_sameChange.append(i)
-
-    # write a file with the indices of the files that were deleted
-    # a) because they were unchanged
-    with open("Results/unchanged.txt", "a", encoding="utf-8") as unchanged_indices:
-        for elem in deleted_indices_unchanged:
-            unchanged_indices.write(elem)
-
-    # b) because they contained the same change
-    with open("Results/sameChange.txt", "a", encoding="utf-8") as sameChange_indices:
-        for elem in deleted_indices_sameChange:
-            sameChange_indices.write(elem)
-
-    return to_delete_unchanged, to_delete_sameChange
-
-
-def delete_files(path_list, status="none"):
-    # iterate over all file(paths) in to_delete and delete the files
-    if len(path_list) is 0:
-        print("no files to delete because of: ", status)
-        #with open("results.txt", "a") as outfile:
-        #    outfile.write("No files delelted because of: %s".format(status))
-    else:
-        print("deleted because: ", status)
-        #with open("results.txt", "a") as outfile:
-        #    outfile.write("%d deleted because of: %s".format(len(path_list)/3, status))
-        for path in path_list:
-            print("deleting: ", path)
-            os.unlink(path)
-
 
 def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
     # create lists of all files in the folders (for original need to filter out subdirs
@@ -130,7 +51,7 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
                         lev_hg = 0
                         lev_wg = 0
                         lev_hw = 0
-                        for j in range(len(h_words)):
+                        for j in range(len(o_words)):
                             #id = str(i+1) + "." + str(j)
                             if g_words[j] == h_words[j]:
                                 if g_words[j] == w_words[j]:
@@ -195,6 +116,103 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
         full_data = full_data.append(data)
 
     return full_data
+
+def write_evalFile(data):
+    '''
+    writes the evaluation file as csv-file (results.csv)
+    :param data: dataset
+    '''
+
+    # get all evaluation measurements
+    word_percentCorrect = get_percentCorrect(data, "word")
+    hun_percentCorrect = get_percentCorrect(data, "hun")
+
+    word_percentFalse = get_percentFalse(data, "word")
+    hun_percentFalse = get_percentFalse(data, "hun")
+
+    word_precision = calculate_precision(data, "word")
+    hun_precision = calculate_precision(data, "hun")
+
+    word_recall = calculate_recall(data, "word")
+    hun_recall = calculate_recall(data, "hun")
+
+    word_fscore = calculate_FScore(data, "word")
+    hun_fscore = calculate_FScore(data, "hun")
+
+    word_accuracy = calculate_Accuracy(data, "word")
+    hun_accuracy = calculate_Accuracy(data, "hun")
+
+    word_specificity = calculate_Specificity(data, "word")
+    hun_specificity = calculate_Specificity(data, "hun")
+
+    # write all elements into dict
+
+    output_dict = {"Word":{
+                        "Word_Percent_correct" : word_percentCorrect,
+                        "Word_Percent_false": word_percentFalse,
+                        "Word_Precision": word_precision,
+                        "Word_Recall": word_recall,
+                        "Word_Fscore": word_fscore,
+                        "Word_accuracy": word_accuracy,
+                        "Word_specificity": word_specificity},
+                    "Hun": {
+                        "Hun_Percent_correct": hun_percentCorrect,
+                        "Hun_Percent_false": hun_percentFalse,
+                        "Hun_Precision": hun_precision,
+                        "Hun_Recall": hun_recall,
+                        "Hun_Fscore": hun_fscore,
+                        "Hun_accuracy": hun_accuracy,
+                        "Hun_specificity": hun_specificity,
+                    }
+    }
+    # write output to csv
+    filename = "Results/results.csv"
+    with open(filename, 'a') as csv_file:
+        writer = csv.writer(csv_file)
+        for key, value in output_dict.items():
+            # get nested dict output
+            if isinstance(value, dict):
+                for nested_key, nested_value in value.items():
+                    writer.writerow([nested_key, nested_value])
+            else:
+                writer.writerow([key, value])
+    print("Writing precision, fscore and more into evaluation file {} - Done!".format(filename))
+
+def gold_eval(data):
+    only_errors = data[data["Error"] == 1]
+    #print(only_errors)
+
+    data_size = len(only_errors.index)
+
+    hun_unrecognized = only_errors[only_errors["Original"] == only_errors["Hunspell"]]
+    word_unrecognized = only_errors[only_errors["Original"] == only_errors["Word"]]
+
+    hun_percent = round(len(hun_unrecognized.index) / data_size * 100,2)
+    word_percent = round(len(word_unrecognized.index) / data_size * 100, 2)
+
+    output_dict = {
+        "All errors": data_size,
+        "Word": {
+            "# word unrecognized": len(word_unrecognized.index),
+            "% word unrecognized": word_percent,
+        },
+        "Hunspell": {
+            "# hunspell unrecognized": len(hun_unrecognized.index),
+            "% hun unrecognized": hun_percent
+        }
+    }
+    filename = 'Results/results.csv'
+    with open(filename, 'a') as csv_file:
+        writer = csv.writer(csv_file)
+        for key, value in output_dict.items():
+            # get nested dict output
+            if isinstance(value, dict):
+                for nested_key, nested_value in value.items():
+                    writer.writerow([nested_key, nested_value])
+            else:
+                writer.writerow([key, value])
+    print("Writing statistics about unfound errors into {} - Done!".format(filename))
+
 
 def get_truePos(data, checker):
     '''
@@ -438,53 +456,3 @@ def calculate_Specificity(data, checker):
     except ZeroDivisionError:
         specificity = 0
     return round(specificity,2)
-
-def write_evalFile(data):
-    '''
-    writes the evaluation file as csv-file (results.csv)
-    :param data: dataset
-    '''
-
-    # get all evaluation measurements
-    word_percentCorrect = get_percentCorrect(data, "word")
-    hun_percentCorrect = get_percentCorrect(data, "hun")
-
-    word_percentFalse = get_percentFalse(data, "word")
-    hun_percentFalse = get_percentFalse(data, "hun")
-
-    word_precision = calculate_precision(data, "word")
-    hun_precision = calculate_precision(data, "hun")
-
-    word_recall = calculate_recall(data, "word")
-    hun_recall = calculate_recall(data, "hun")
-
-    word_fscore = calculate_FScore(data, "word")
-    hun_fscore = calculate_FScore(data, "hun")
-
-    word_accuracy = calculate_Accuracy(data, "word")
-    hun_accuracy = calculate_Accuracy(data, "hun")
-
-    word_specificity = calculate_Specificity(data, "word")
-    hun_specificity = calculate_Specificity(data, "hun")
-
-    # write all elements into dict
-    output_dict = {"Word_Percent_correct" : word_percentCorrect,
-                   "Hun_Percent_correct": hun_percentCorrect,
-                   "Word_Percent_false": word_percentFalse,
-                   "Hun_Percent_false": hun_percentFalse,
-                   "Word_Precision": word_precision,
-                   "Hun_Precision": hun_precision,
-                   "Word_Recall": word_recall,
-                   "Hun_Recall": hun_recall,
-                   "Word_Fscore": word_fscore,
-                   "Hun_Fscore": hun_fscore,
-                   "Word_accuracy": word_accuracy,
-                   "Hun_accuracy": hun_accuracy,
-                   "Word_specificity": word_specificity,
-                   "Hun_specificity": hun_specificity,
-                   }
-    # write output to csv
-    with open('results.csv', 'a') as csv_file:
-        writer = csv.writer(csv_file)
-        for key, value in output_dict.items():
-            writer.writerow([key, value])

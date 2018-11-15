@@ -25,13 +25,13 @@ def reduce_int(data):
 
     return data
 
-def reduce_matchType(data):
+def reduce_Error_to_Categorical(data):
     '''
     reduces size by making Match-Type column a category
     :param data:
     :return:
     '''
-    data["Match-Type"] = data["Match-Type"].astype("category")
+    data["Error"] = data["Error"].astype("category")
     return data
 
 def reduce(data):
@@ -40,8 +40,9 @@ def reduce(data):
     :param data: big DataFrame
     :return: reduced DataFrame
     '''
-    #data = reduce_matchType(data)
+    data = reduce_Error_to_Categorical(data)
     data = reduce_int(data)
+    print("Reducing dataframe size - Done!")
     return data
 
 
@@ -51,8 +52,8 @@ def custom_csv(csv_file):
     :param csv_file: path to csv
     :return: DataFrame
     '''
-    column_names = ['Comment-ID', 'Word-ID', 'Match-Type', 'Original', 'Gold', 'Hunspell', 'Word', 'lev_hg', 'lev_wg', 'lev_hw', 'lev_og']
-    dtypes = ['uint8', 'uint8', 'uint8', 'object', 'object', 'object', 'object', 'uint8', 'uint8', 'uint8', 'uint8']
+    column_names = ['Comment-ID', 'Word-ID', 'Match-Type', 'Error', 'Original', 'Gold', 'Hunspell', 'Word', 'lev_hg', 'lev_wg', 'lev_hw', 'lev_og']
+    dtypes = ['uint8', 'uint8', 'uint8', 'category', 'object', 'object', 'object', 'object', 'uint8', 'uint8', 'uint8', 'uint8']
     column_types = dict(zip(column_names, dtypes))
     data = pd.read_csv(csv_file, dtype=column_types)
     return data

@@ -25,17 +25,20 @@ def correct_word(word, h):
     '''
 
     corrected = ""
-    if not h.spell(word): #if spell check returns False
-        suggestions = h.suggest(word) # suggest correct words
+    try:
+        if not h.spell(word): #if spell check returns False
+            suggestions = h.suggest(word) # suggest correct words
 
-        if suggestions: # if there are suggestions
-            best = suggestions[0]
-            corrected = best # make word to be the first suggestion
+            if suggestions: # if there are suggestions
+                best = suggestions[0]
+                corrected = best # make word to be the first suggestion
+            else:
+                corrected = word # if no suggestions, keep wrong word
         else:
-            corrected = word # if no suggestions, keep wrong word
-    else:
-        corrected = word # if word is correct, simply return that
-
+            corrected = word # if word is correct, simply return that
+    except UnicodeEncodeError as Error:
+        print(Error)
+        corrected = word
     return corrected
 
 
@@ -83,6 +86,8 @@ def apply_hunspell_on_dir(directory):
 
     print("Applying Hunspell - Done!")
 
+
+# ---------------------------- unused methods -----------------------------------
 def apply_hunspell_on_list(data):
     '''
     applies hunspell spell checking on a dataset

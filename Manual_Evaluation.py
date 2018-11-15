@@ -1,0 +1,66 @@
+import os
+import Levenshtein
+import csv
+
+def corrections_toCSV(original_folder, hunspell_folder, word_folder, filename):
+    '''
+    writes every word that was corrected by at least one of the checkers into csv
+    left context, original word, right context, word correction, hun correction
+    :param original_folder: folder with the original files
+    :param hunspell_folder: folder with the files processed by hunspell
+    :param word_folder: folder with the files processed by word
+    '''
+
+    # make lists for directory contents
+    original_list = [f for f in os.listdir(original_folder) if os.path.isfile(os.path.join(original_folder, f))]
+    hunspell_list = os.listdir(hunspell_folder)
+    word_list = os.listdir(word_folder)
+
+    # open file to write errors in
+
+    with open("Results/" + filename, "w", encoding="utf-8") as csvfile:
+        writer = csv.writer(csvfile, delimiter=",") #need csv writer
+        # write headers
+        writer.writerow(["left context", "original word", "right context", "word correction", "hun correction"])
+
+        for i in range(0, len(word_list)):
+            #create a path for all of the files
+            o_path = os.path.join(original_folder, original_list[i])
+            h_path = os.path.join(hunspell_folder, hunspell_list[i])
+            w_path = os.path.join(word_folder, word_list[i])
+
+            # open the files
+            with open(o_path, "r") as original_file:
+                with open(h_path, "r") as hunspell_file:
+                    with open(w_path, "r") as word_file:
+                        # read the content of the files
+                        o_content = original_file.read()
+                        h_content = hunspell_file.read()
+                        w_content = word_file.read()
+
+                        # split the words
+                        o_words = o_content.split(" ")
+                        h_words = h_content.split(" ")
+                        w_words = w_content.split(" ")
+
+                        # for every word in the files/wordlists
+                        for j in range(0, len(o_words)):
+                            # if either word or hunspell changed the word (lev != 0)
+                            if((Levenshtein.distance(o_words[j], h_words[j]) != 0) or (Levenshtein.distance(o_words[j], w_words[j]) != 0)):
+                                # try to access word with indices
+                                try:
+                                    writer.writerow([o_words[j-1], o_words[j], o_words[j+1], w_words[j], h_words[j]])
+                                except IndexError as error: #with index out of bounds, use - as spaceholder
+                                    if j == 0: # first word of file
+                                        writer.writerow(["-", o_words[j], o_words[j + 1], w_words[j],
+                                                         h_words[j]])
+                                    elif j == len(o_words)-1: # last word of file
+                                        writer.writerow([o_words[j-1], o_words[j], "-", w_words[j],
+                                                         h_words[j]])
+                                    else:
+                                        print(error)
+    print("Writing all edited words into {} for manual inspection - Done!".format("Results/" + filename))
+
+# @TODO Method that imports csv and drops duplicate rows
+def drop_duplicate_rows_from_csv(filename):
+    pass
