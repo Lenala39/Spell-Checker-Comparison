@@ -1,6 +1,7 @@
 import os
 import Levenshtein
 import csv
+import pandas as pd
 
 def corrections_toCSV(original_folder, hunspell_folder, word_folder, filename):
     '''
@@ -61,6 +62,18 @@ def corrections_toCSV(original_folder, hunspell_folder, word_folder, filename):
                                         print(error)
     print("Writing all edited words into {} for manual inspection - Done!".format("Results/" + filename))
 
-# @TODO Method that imports csv and drops duplicate rows
 def drop_duplicate_rows_from_csv(filename):
-    pass
+    '''
+    Imports the csv file with the errors into dataframe and removes duplicate rows
+    :param filename: csv file with the list of errors
+    '''
+    # read in the csv file containing the errors
+    errorlist = pd.read_csv(filename, delimiter=",", header=0, encoding="utf-8")
+    # drop duplicates disregarding left and right context
+    errorlist = errorlist.drop_duplicates(subset=["original word","word correction","hun correction"], keep="first")
+    # build new filename
+    new_filename = filename.split(".")[0] + "_noDuplicates.csv"
+    # write to (new) csv file
+    errorlist.to_csv(new_filename, sep=",", index=False, encoding="utf-8", header=True)
+
+    print("Dropping all duplicate lines in {} and storing result in {} - Done!".format(filename, new_filename))

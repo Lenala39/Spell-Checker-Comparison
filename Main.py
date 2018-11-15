@@ -18,7 +18,7 @@ if __name__ == '__main__':
     word_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Test_Files\\Word"
     gold_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Test_Files\\Gold"
     file_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Test_Files"
-
+    '''
     # --------- DATABASE ACCESS + PROCESSING-----------------------
     data = DB_access.access_corpus(6)
 
@@ -61,19 +61,6 @@ if __name__ == '__main__':
     Manual_Evaluation.corrections_toCSV(original_folder=original_folder, hunspell_folder=hunspell_folder,
                                         word_folder=word_folder, filename="errors_test.csv")
     
-    '''
-    true_pos = Gold_Evaluation.get_truePos(data, "hun")
-    true_neg = Gold_Evaluation.get_trueNeg(data, "hun")
-    false_pos = Gold_Evaluation.get_falsePos(data, "hun")
-    false_neg = Gold_Evaluation.get_falseNeg(data, "hun")
-
-
-    recall = Gold_Evaluation.calculate_recall(data, "hun")
-    precision = Gold_Evaluation.calculate_precision(data, "hun")
-
-    word_percent_correct = Gold_Evaluation.get_percentCorrect(data, "word")
-    hun_percent_correct = Gold_Evaluation.get_percentCorrect(data, "hun")
-
-    word_percent_false = Gold_Evaluation.get_percentFalse(data, "word")
-    hun_percent_false = Gold_Evaluation.get_percentFalse(data, "hun")
+    # dropping duplicate lines in csv file
+    Manual_Evaluation.drop_duplicate_rows_from_csv("Results/errors.csv")
     '''
