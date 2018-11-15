@@ -33,9 +33,6 @@ def corrections_toCSV(original_folder, hunspell_folder, word_folder, filename):
             h_path = os.path.join(hunspell_folder, hunspell_list[i])
             w_path = os.path.join(word_folder, word_list[i])
 
-            if i%50 == 0:
-                print("Writing csv: {}% done!".format(round(i / len(original_list) * 100)))
-
             # open the files
             with open(o_path, "r", encoding="utf-8") as original_file:
                 with open(h_path, "r", encoding="utf-8") as hunspell_file:
@@ -82,11 +79,13 @@ def drop_duplicate_rows_from_csv(filename):
     '''
     # read in the csv file containing the errors
     errorlist = pd.read_csv(filename, delimiter=",", header=0, encoding="cp1252")
+    old_length = len(errorlist.index)
     # drop duplicates disregarding left and right context
     errorlist = errorlist.drop_duplicates(subset=["original word","word correction","hun correction"], keep="first")
+    new_length = len(errorlist.index)
     # build new filename
     new_filename = filename.split(".")[0] + "_noDuplicates.csv"
     # write to (new) csv file
     errorlist.to_csv(new_filename, sep=",", index=False, encoding="utf-8", header=True)
-
-    print("Dropping all duplicate lines in {} and storing result in {} - Done!".format(filename, new_filename))
+    print("Removed {} duplicate lines - Done.".format(old_length - new_length))
+    #print("Dropping all duplicate lines in {} and storing result in {} - Done!".format(filename, new_filename))
