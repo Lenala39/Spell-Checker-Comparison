@@ -3,7 +3,6 @@ from copy import deepcopy
 import platform
 import os
 import re
-import datetime
 
 def make_checker():
     '''

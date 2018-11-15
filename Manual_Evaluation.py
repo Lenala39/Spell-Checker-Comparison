@@ -14,53 +14,66 @@ def corrections_toCSV(original_folder, hunspell_folder, word_folder, filename):
 
     # make lists for directory contents
     original_list = [f for f in os.listdir(original_folder) if os.path.isfile(os.path.join(original_folder, f))]
-    hunspell_list = os.listdir(hunspell_folder)
-    word_list = os.listdir(word_folder)
+    hunspell_list = [f for f in os.listdir(hunspell_folder) if os.path.isfile(os.path.join(hunspell_folder, f))]
+    word_list = [f for f in os.listdir(word_folder) if os.path.isfile(os.path.join(word_folder, f))]
+    original_list.sort()
+    hunspell_list.sort()
+    word_list.sort()
 
     # open file to write errors in
 
-    with open("Results/" + filename, "w", encoding="utf-8") as csvfile:
+    with open("Results/" + filename, "w") as csvfile:
         writer = csv.writer(csvfile, delimiter=",") #need csv writer
         # write headers
         writer.writerow(["left context", "original word", "right context", "word correction", "hun correction"])
-
+        
         for i in range(0, len(word_list)):
             #create a path for all of the files
             o_path = os.path.join(original_folder, original_list[i])
             h_path = os.path.join(hunspell_folder, hunspell_list[i])
             w_path = os.path.join(word_folder, word_list[i])
 
+            if i%50 == 0:
+                print("Writing csv: {}% done!".format(round(i / len(original_list) * 100)))
+
             # open the files
-            with open(o_path, "r") as original_file:
-                with open(h_path, "r") as hunspell_file:
+            with open(o_path, "r", encoding="utf-8") as original_file:
+                with open(h_path, "r", encoding="utf-8") as hunspell_file:
                     with open(w_path, "r") as word_file:
                         # read the content of the files
-                        o_content = original_file.read()
-                        h_content = hunspell_file.read()
-                        w_content = word_file.read()
+                        o_content = original_file.read().strip()
+                        h_content = hunspell_file.read().strip()
+                        w_content = word_file.read().strip()
 
                         # split the words
                         o_words = o_content.split(" ")
                         h_words = h_content.split(" ")
                         w_words = w_content.split(" ")
 
+                        length_list = [len(o_words), len(w_words), len(h_words)]
+                        index = min(length_list)
                         # for every word in the files/wordlists
-                        for j in range(0, len(o_words)):
+                        for j in range(0, index):
                             # if either word or hunspell changed the word (lev != 0)
                             if((Levenshtein.distance(o_words[j], h_words[j]) != 0) or (Levenshtein.distance(o_words[j], w_words[j]) != 0)):
                                 # try to access word with indices
                                 try:
                                     writer.writerow([o_words[j-1], o_words[j], o_words[j+1], w_words[j], h_words[j]])
                                 except IndexError as error: #with index out of bounds, use - as spaceholder
-                                    if j == 0: # first word of file
-                                        writer.writerow(["-", o_words[j], o_words[j + 1], w_words[j],
+                                    if j == 0 and index == 1: # first word of file
+                                        writer.writerow(["-", o_words[j], "-", w_words[j],
                                                          h_words[j]])
-                                    elif j == len(o_words)-1: # last word of file
+                                    elif j == index-1: # last word of file
                                         writer.writerow([o_words[j-1], o_words[j], "-", w_words[j],
                                                          h_words[j]])
+                                    elif (j == 0):
+                                        writer.writerow(["-", o_words[j], o_words[j + 1], w_words[j],
+                                                         h_words[j]])
+
                                     else:
                                         print(error)
     print("Writing all edited words into {} for manual inspection - Done!".format("Results/" + filename))
+
 
 def drop_duplicate_rows_from_csv(filename):
     '''
@@ -68,7 +81,7 @@ def drop_duplicate_rows_from_csv(filename):
     :param filename: csv file with the list of errors
     '''
     # read in the csv file containing the errors
-    errorlist = pd.read_csv(filename, delimiter=",", header=0, encoding="utf-8")
+    errorlist = pd.read_csv(filename, delimiter=",", header=0, encoding="cp1252")
     # drop duplicates disregarding left and right context
     errorlist = errorlist.drop_duplicates(subset=["original word","word correction","hun correction"], keep="first")
     # build new filename
