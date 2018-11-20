@@ -5,7 +5,7 @@ import Reduce
 import Gold_Evaluation
 import MatchType
 import Manual_Evaluation
-
+import itertools
 import pandas as pd
 if __name__ == '__main__':
     # folder names
@@ -52,11 +52,12 @@ if __name__ == '__main__':
     #write file containing fscore, precision, recall etc
     Gold_Evaluation.write_evalFile(data)
     Gold_Evaluation.gold_eval(data)
-    
     '''
+    
     # ------------------------EVAL WITHOUT GOLD - ONLY CSV OUTPUT FOR MANUAL PROCESSING--------------------
     Manual_Evaluation.corrections_toCSV(original_folder=original_folder, hunspell_folder=hunspell_folder,
-                                        word_folder=word_folder, filename="many_errors.csv")
+                                        word_folder=word_folder, filename="many_errors_new.csv")
     
     # dropping duplicate lines in csv file
-    Manual_Evaluation.drop_duplicate_rows_from_csv("Results/many_errors.csv")
+    #Manual_Evaluation.drop_duplicate_rows_from_csv("Results/many_errors.csv")
+

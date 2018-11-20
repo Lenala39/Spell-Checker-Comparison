@@ -36,6 +36,7 @@ def replace_chars(text):
     text = text.replace(";", " ")
     text = text.replace(":", " ")
     text = text.replace("€", " ")
+    text = text.replace("\"", " ")
     text = text.replace(u'\u201e', "") #double low quotation marks
     text = text.replace(u"\u201C", "") #left double quotation marks
     text = text.replace(u"\u2013", "") #dash
