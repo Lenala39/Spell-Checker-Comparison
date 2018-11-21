@@ -42,10 +42,10 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
                         w_content = word_file.read()
                         g_content = gold_file.read()
 
-                        o_words = o_content.split(" ")
-                        h_words = h_content.split(" ")
-                        w_words = w_content.split(" ")
-                        g_words = g_content.split(" ")
+                        o_words = o_content.split("\n")
+                        h_words = h_content.split("\n")
+                        w_words = w_content.split("\n")
+                        g_words = g_content.split("\n")
 
                         type = ""
                         lev_hg = 0

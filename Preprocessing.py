@@ -14,6 +14,7 @@ def remove_special_chars(data, folder):
         text = data[i][7]
         if text is not None:
             text = replace_chars(text)
+            text = add_crlf(text)
             new_data.append(text)
             write_file(text, data[i][0], folder)
     print("Removing special characters - Done!")
@@ -37,6 +38,7 @@ def replace_chars(text):
     text = text.replace(":", " ")
     text = text.replace("€", " ")
     text = text.replace("\"", " ")
+    text = text.replace('"', " ")
     text = text.replace(u'\u201e', "") #double low quotation marks
     text = text.replace(u"\u201C", "") #left double quotation marks
     text = text.replace(u"\u2013", "") #dash
@@ -45,7 +47,13 @@ def replace_chars(text):
 
     text = re.sub(r" {2,}", " ", text) #replace more than one whitespace with a single one
     text = text.strip() # remove whitespaces from the beginning of the comment
+
     return text
+
+def add_crlf(text):
+    single_words = text.split(" ")
+    new_text = '\n'.join(single_words)
+    return new_text
 
 def write_file(comment, id, folder):
     '''
@@ -55,7 +63,7 @@ def write_file(comment, id, folder):
     :param folder: folder to write the file into
     '''
     # format the filename to write with the dir and the id
-    filename = folder + "/{}.txt".format(id)
+    filename = folder + "/{}_original.txt".format(id)
     # open the file and write it
     with open(filename, "w", encoding="utf-8") as file:
         file.write(comment)

@@ -32,24 +32,29 @@ def corrections_toCSV(original_folder, hunspell_folder, word_folder, filename):
         writer.writerow(["left context", "original word", "right context", "word correction", "hun correction"])
 
         for i in range(0, len(word_list)):
+
+            if i % 50 == 0:
+                print("working on csv file: {}%".format(round(i / len(word_list) * 100)))
+
             # create a path for all of the files
             o_path = os.path.join(original_folder, original_list[i])
             h_path = os.path.join(hunspell_folder, hunspell_list[i])
             w_path = os.path.join(word_folder, word_list[i])
-
+            #@todo: fix new input format with "\n" as word delimiter
             # open the files
             with open(o_path, "r", encoding="utf-8") as original_file:
                 with open(h_path, "r", encoding="utf-8") as hunspell_file:
-                    with io.open(w_path, "r", encoding="utf-8") as word_file:
+                    with io.open(w_path, "r", encoding="cp1252") as word_file:
                         # read the content of the files
                         o_content = original_file.read().strip()
                         h_content = hunspell_file.read().strip()
                         w_content = word_file.read().strip()
 
                         # split the words
-                        o_words = o_content.split(" ")
-                        h_words = h_content.split(" ")
-                        w_words = w_content.split(" ")
+                        o_words = o_content.split("\n")
+                        h_words = h_content.split("\n")
+                        w_words = w_content.split(" ") #@TODO change format of word files
+
 
                         # rotate the original words list by 1/-1 to get the word before/after the original
                         left_context = collections.deque(o_words)
@@ -136,9 +141,9 @@ def corrections_toCSV_OLD(original_folder, hunspell_folder, word_folder, filenam
                         w_content = word_file.read().strip()
 
                         # split the words
-                        o_words = o_content.split(" ")
-                        h_words = h_content.split(" ")
-                        w_words = w_content.split(" ")
+                        o_words = o_content.split("\n")
+                        h_words = h_content.split("\n")
+                        w_words = w_content.split("\n")
 
                         parser_list = [o_words, w_words, h_words]
                         index = min([len(f) for f in parser_list])

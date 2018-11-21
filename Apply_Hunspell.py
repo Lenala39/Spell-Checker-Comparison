@@ -57,7 +57,7 @@ def apply_hunspell_on_dir(directory):
     Applies hunspell on all files in a directory that are named like XX.txt
     :param directory: directory of the files
     '''
-
+    print("Applying hunspell on{}".format(directory))
     file_list = os.listdir(directory) #make list of all files in the directory
     dir_size = len(file_list) #get size of directory
     h = make_checker() # make checker
@@ -67,18 +67,18 @@ def apply_hunspell_on_dir(directory):
         if i % 50 is 0:
             print("Applying Hunspell: {}% done".format(round(i/dir_size * 100, 0)) )
 
-        file_pattern = re.compile("[0-9]+.txt") # make pattern to match XX.txt files
+        file_pattern = re.compile("[0-9]+_original.txt") # make pattern to match XX.txt files
         if re.match(file_pattern, file_list[i]): # if match
             filename = "{}/{}".format(directory, file_list[i])
 
             with open(filename, "r", encoding="utf-8") as file: #open the file to read
                 comment = file.read() # read the content
-                single_words = comment.split(" ") #split the string from the file
+                single_words = comment.split("\n") #split the string from the file
                 for j in range(len(single_words)): # apply spell check on every word
                     single_words[j] = correct_word(single_words[j], h)
 
-                corrected_comment = " ".join(single_words) # re-join the corrected comments
-                file_index = file_list[i].split(".")[0]
+                corrected_comment = "\n".join(single_words) # re-join the corrected comments
+                file_index = file_list[i].split("_")[0]
                 corrected_filename = "{}/Hunspell/{}_hunspell.txt".format(directory, file_index) # make new filename
                 with open(corrected_filename, "w", encoding="utf-8") as new_file: # open new file
                     new_file.write(corrected_comment) #write correction into new file
@@ -119,10 +119,10 @@ def normal_correction(data, h):
 
     # for every comment in list of comments
     for i in range(len(data)):
-        single_words = data[i].split(" ") #split the text into single words
+        single_words = data[i].split("\n") #split the text into single words
         for j in range(len(single_words)): #iterate over single words
             single_words[j] = correct_word(single_words[j], h) # correct each word
-        complete_comment = " ".join(single_words)
+        complete_comment = "\n".join(single_words)
         corrected_comments.append(complete_comment) # append to corrected comments
         write_file(complete_comment, i+1)
     return corrected_comments
@@ -137,10 +137,10 @@ def metadata_correction(data, h):
 
     corrected_data = deepcopy(data) # copy data as deepcopy to keep orginal
     for i in range(len(corrected_data)): # for every list in the dataset
-        single_words = corrected_data[i][7].split(" ") # access only the comment and split at " "
+        single_words = corrected_data[i][7].split("\n") # access only the comment and split at " "
         for j in range(len(single_words)):
             single_words[j] = correct_word(single_words[j], h) # correct each single word
-        complete_comment = " ".join(single_words)
+        complete_comment = "\n".join(single_words)
         corrected_data[i][7] = complete_comment # assign new corrected words to list
         write_file(complete_comment, i+1)
     return corrected_data
