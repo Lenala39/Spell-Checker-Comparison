@@ -32,7 +32,6 @@ def corrections_toCSV(original_folder, hunspell_folder, word_folder, filename):
         writer.writerow(["left context", "original word", "right context", "word correction", "hun correction"])
 
         for i in range(0, len(word_list)):
-
             if i % 50 == 0:
                 print("working on csv file: {}%".format(round(i / len(word_list) * 100)))
 
@@ -40,11 +39,11 @@ def corrections_toCSV(original_folder, hunspell_folder, word_folder, filename):
             o_path = os.path.join(original_folder, original_list[i])
             h_path = os.path.join(hunspell_folder, hunspell_list[i])
             w_path = os.path.join(word_folder, word_list[i])
-            #@todo: fix new input format with "\n" as word delimiter
+
             # open the files
             with open(o_path, "r", encoding="utf-8") as original_file:
                 with open(h_path, "r", encoding="utf-8") as hunspell_file:
-                    with io.open(w_path, "r", encoding="cp1252") as word_file:
+                     with open(w_path, "r", encoding="cp1252") as word_file: #old reading with encoding
                         # read the content of the files
                         o_content = original_file.read().strip()
                         h_content = hunspell_file.read().strip()
@@ -53,9 +52,7 @@ def corrections_toCSV(original_folder, hunspell_folder, word_folder, filename):
                         # split the words
                         o_words = o_content.split("\n")
                         h_words = h_content.split("\n")
-                        w_words = w_content.split(" ") #@TODO change format of word files
-
-
+                        w_words = w_content.split("\n")
                         # rotate the original words list by 1/-1 to get the word before/after the original
                         left_context = collections.deque(o_words)
                         left_context.rotate(-1)
@@ -78,6 +75,19 @@ def corrections_toCSV(original_folder, hunspell_folder, word_folder, filename):
                         writer.writerows(output_list)
     print("Writing all edited words into {} for manual inspection - Done!".format("Results/" + filename))
 
+def test_inputFromCSV(filename):
+    '''
+    test encoding when importing from csv
+    :param filename: file to import
+    '''
+
+    with open("Results/" + filename, "r", encoding="utf-8") as csvfile:
+        reader = csv.reader(csvfile, delimiter=",")
+        for row in reader:
+            try:
+                print(row[3])
+            except IndexError:
+                pass
 
 def drop_duplicate_rows_from_csv(filename):
     '''

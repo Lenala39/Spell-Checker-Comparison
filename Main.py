@@ -7,15 +7,33 @@ import MatchType
 import Manual_Evaluation
 import itertools
 import pandas as pd
+
+
 if __name__ == '__main__':
     # folder names
-    original_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Many_Files"
-    hunspell_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Many_Files\\Hunspell"
-    word_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Many_Files\\Word"
-    gold_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Many_Files\\Gold"
-    file_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Many_Files"
+    original_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files"
+    hunspell_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files\\Hunspell"
+    word_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files\\Word"
+    gold_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files\\Gold"
+    file_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files"
+    word_test = "F:\\200Files_cp1252\\Word"
+    import csv
+    import chardet
 
+    '''
+    with open("C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files\\Word\\3_word.txt", "rb") as test:
+        lines = test.readlines()
+        with open("C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Results\\test.csv", "w", encoding="utf-8") as csvfile:
+            writer = csv.writer(csvfile)
+            for i in range(len(lines)):
+                print(lines[i], chardet.detect(lines[i]))
 
+                lines[i] = lines[i].decode("cp1252")
+
+            writer.writerow(lines)
+
+            line = test.readline()
+    
     # --------- DATABASE ACCESS + PROCESSING-----------------------
     data = DB_access.access_corpus(2000)
 
@@ -26,7 +44,7 @@ if __name__ == '__main__':
     # ------------APPLY SPELLCHECKING---------------------------------
     Apply_Hunspell.apply_hunspell_on_dir(file_folder)
     pd.set_option('display.max_columns', 12) # set display options to show all columns
-    '''
+    
     
     #---------------------DELETE UNCHANGED------------------------------
     # delete the files that are unchanged or have the same change
@@ -57,8 +75,9 @@ if __name__ == '__main__':
     '''
     # ------------------------EVAL WITHOUT GOLD - ONLY CSV OUTPUT FOR MANUAL PROCESSING--------------------
     Manual_Evaluation.corrections_toCSV(original_folder=original_folder, hunspell_folder=hunspell_folder,
-                                        word_folder=word_folder, filename="many_errors_new.csv")
+                                        word_folder=word_test, filename="200_Errors.csv")
 
     # dropping duplicate lines in csv file
     #Manual_Evaluation.drop_duplicate_rows_from_csv("Results/many_errors.csv")
 
+    #@todo make word eval many files, already on Goldie
