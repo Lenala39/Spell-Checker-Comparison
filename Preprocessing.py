@@ -147,6 +147,15 @@ def delete_files(path_list, status="none"):
     :param path_list: list of file paths
     :param status: why the file needed to be deleted
     '''
+    with open("Deleted_Files.txt", "a") as file:
+        try:
+            file.write(status)
+        except:
+            pass
+        file.write("\n")
+        file.write("\n".join(path_list))
+        file.write(str(len(path_list)))
+
     if len(path_list) is 0:
         print("no files to delete because of: ", status)
     else:

@@ -95,7 +95,7 @@ def drop_duplicate_rows_from_csv(filename):
     :param filename: csv file with the list of errors
     '''
     # read in the csv file containing the errors
-    errorlist = pd.read_csv(filename, delimiter=",", header=0, encoding="cp1252")
+    errorlist = pd.read_csv(filename, delimiter=",", header=0, encoding="utf-8")
     old_length = len(errorlist.index)
     # drop duplicates disregarding left and right context
     errorlist = errorlist.drop_duplicates(subset=["original word","word correction","hun correction"], keep="first")

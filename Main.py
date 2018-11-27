@@ -11,29 +11,13 @@ import pandas as pd
 
 if __name__ == '__main__':
     # folder names
-    original_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files"
-    hunspell_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files\\Hunspell"
-    word_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files\\Word"
-    gold_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files\\Gold"
-    file_folder = "C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files"
-    word_test = "F:\\200Files_cp1252\\Word"
-    import csv
-    import chardet
+    original_folder = "C:\\Users\\Lena Langholf\\Dropbox\\Spell_Checking\\Files"
+    hunspell_folder = "C:\\Users\\Lena Langholf\\Dropbox\\Spell_Checking\\Files\\Hunspell"
+    word_folder = "C:\\Users\\Lena Langholf\\Dropbox\\Spell_Checking\\Files\\Word"
+    gold_folder = "C:\\Users\\Lena Langholf\\Dropbox\\Spell_Checking\\Files\\Gold"
+    file_folder = "C:\\Users\\Lena Langholf\\Dropbox\\Spell_Checking\\Files"
 
-    '''
-    with open("C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Files\\Word\\3_word.txt", "rb") as test:
-        lines = test.readlines()
-        with open("C:\\Users\\Lena_Langholf\\Dropbox\\Spell_Checking\\Results\\test.csv", "w", encoding="utf-8") as csvfile:
-            writer = csv.writer(csvfile)
-            for i in range(len(lines)):
-                print(lines[i], chardet.detect(lines[i]))
-
-                lines[i] = lines[i].decode("cp1252")
-
-            writer.writerow(lines)
-
-            line = test.readline()
-    
+    '''    
     # --------- DATABASE ACCESS + PROCESSING-----------------------
     data = DB_access.access_corpus(2000)
 
@@ -52,13 +36,16 @@ if __name__ == '__main__':
                                                                           hunspell_folder=hunspell_folder,
                                                                           word_folder=word_folder,
                                                                           gold_folder=gold_folder)
-    Preprocessing.delete_files(to_delete_un)
-    Preprocessing.delete_files(to_delete_same)
 
+    
+    Preprocessing.delete_files(to_delete_un, "unchanged")
+    Preprocessing.delete_files(to_delete_same, "same change")
+        
     # -------------------EVAL WITH GOLD (AUTOMATIC)-------------------------------
     # evaluate and compare the files
     data = Gold_Evaluation.compare_files(original_folder=original_folder, hunspell_folder=hunspell_folder,
                                          word_folder=word_folder, gold_folder=gold_folder)
+
 
     #------------------REDUCE DATAFRAME-------------------------------------------
     # drop duplicate rows (want unique items)
@@ -72,12 +59,18 @@ if __name__ == '__main__':
     Gold_Evaluation.write_evalFile(data)
     Gold_Evaluation.gold_eval(data)
     
-    '''
+    # ------------------ PROCESS EVALUATION FILE--------------------------------------
+    data.to_csv("Results/200Errors_all.csv", index=False, encoding="utf-8", header=True)
+
+    results = pd.read_csv("Results/results.csv", delimiter=",", header=None, encoding="utf-8") #import from csv
+    results = results.drop_duplicates(keep="first") # drop duplicate rows
+    # write back to csv
+    results.to_csv("Results/results_noDuplicates.csv", index=False, header=["measurement", "value"], encoding="utf-8")
+    
     # ------------------------EVAL WITHOUT GOLD - ONLY CSV OUTPUT FOR MANUAL PROCESSING--------------------
     Manual_Evaluation.corrections_toCSV(original_folder=original_folder, hunspell_folder=hunspell_folder,
-                                        word_folder=word_test, filename="200_Errors.csv")
-
+                                        word_folder=word_folder, filename="Many_Errors.csv")
+'''
     # dropping duplicate lines in csv file
-    #Manual_Evaluation.drop_duplicate_rows_from_csv("Results/many_errors.csv")
+    Manual_Evaluation.drop_duplicate_rows_from_csv("Results/Many_Errors.csv")
 
-    #@todo make word eval many files, already on Goldie

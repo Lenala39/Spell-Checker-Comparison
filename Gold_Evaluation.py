@@ -13,6 +13,11 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
     word_list = os.listdir(word_folder)
     gold_list = os.listdir(gold_folder)
 
+    original_list.sort()
+    hunspell_list.sort()
+    gold_list.sort()
+    word_list.sort()
+
     # init dataframes (one for storing each file and refill again, other for returning
     data = pd.DataFrame(np.random.randint(low=0, high=1, size=(1, 12)),
                         columns=["Comment-ID", "Word-ID", "Match-Type", "Error", "Original", "Gold", "Hunspell",
@@ -31,10 +36,10 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
         g_path = os.path.join(gold_folder, gold_list[i])
 
         # open the files
-        with open(o_path, "r") as original_file:
-            with open(h_path, "r") as hunspell_file:
-                with open(w_path, "r") as word_file:
-                    with open(g_path, "r") as gold_file:
+        with open(o_path, "r", encoding="utf-8") as original_file:
+            with open(h_path, "r", encoding="utf-8") as hunspell_file:
+                with open(w_path, "r", encoding="cp1252") as word_file:
+                    with open(g_path, "r", encoding="utf-8") as gold_file:
 
                         # read the content of the files
                         o_content = original_file.read()
