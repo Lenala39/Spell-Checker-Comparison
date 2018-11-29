@@ -25,6 +25,10 @@ def corrections_toCSV(original_folder, hunspell_folder, word_folder, filename):
     hunspell_list.sort()
     word_list.sort()
 
+    # assert lists have equal length
+    assert len(original_list) == len(word_list)
+    assert len(hunspell_list) == len(word_list)
+
     # open file to write errors in
     with open("Results/" + filename, "w", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile, delimiter=",")  # need csv writer
