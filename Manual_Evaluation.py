@@ -4,7 +4,7 @@ import csv
 import pandas as pd
 import collections
 import itertools
-import io
+import Gold_Evaluation
 
 def corrections_toCSV(original_folder, hunspell_folder, word_folder, filename):
     '''
@@ -185,3 +185,229 @@ def corrections_toCSV_OLD(original_folder, hunspell_folder, word_folder, filenam
                                         print(error)
 
     print("Writing all edited words into {} for manual inspection - Done!".format("Results/" + filename))
+
+def manual_evaluation_results(data):
+    # remove cols with MatchType 0 and URLs/Email entries
+    # classified as n.A. in manual eval
+    data = data[data["Match-Type"] != 0]
+    data = data[data["URL/Email"] != 1.0]
+
+    hun_P_correct, _ = get_CorrectWords(data, "hunspell")
+    word_P_correct, _ = get_CorrectWords(data, "word")
+    hun_P_false, _ = get_FalseWords(data, "hunspell")
+    word_P_false, _ = get_FalseWords(data, "word")
+
+    # assert that all entries have a MatchType
+    # -1 because header is counted in the full index
+    assert len(data.index)  == (len(data[data["Match-Type"] == 1.0].index)
+                               + len(data[data["Match-Type"] == 2.0].index)
+                               + len(data[data["Match-Type"] == 3.0].index)
+                               + len(data[data["Match-Type"] == 4.0].index)
+                               + len(data[data["Match-Type"] == 5.0].index)
+                               )
+
+    # make sure that false and correct add up to 100%
+    assert (round(word_P_false + word_P_correct, 0)) == 100.0
+    assert (round(hun_P_false + hun_P_correct, 0)) == 100.0
+
+    hun_recall = calculate_recall(data, "hun")
+    hun_precision = calculate_precision(data, "hun")
+    hun_fscore = calculate_fScore(data, "hun")
+    hun_accuracy = calculate_accuracy(data, "hun")
+    hun_specificity = calculate_specifictiy(data, "hun")
+
+    word_recall = calculate_recall(data, "word")
+    word_precision = calculate_precision(data, "word")
+    word_fscore = calculate_fScore(data, "word")
+    word_accuracy = calculate_accuracy(data, "word")
+    word_specificity = calculate_specifictiy(data, "word")
+
+
+
+    result_dict = {
+        "Word": {
+            "Word % correct" :word_P_correct,
+            "Word % false": word_P_false,
+            "Word recall": word_recall,
+            "Word precision": word_precision,
+            "Word FScore": word_fscore,
+            "Word Accuracy": word_accuracy,
+            "Word specificity": word_specificity,
+        },
+        "Hunspell": {
+            "Hunspell % correct" :hun_P_correct,
+            "Hunspell % false": hun_P_false,
+            "Hunspell recall": hun_recall,
+            "Hunspell precision": hun_precision,
+            "Hunspell FScore": hun_fscore,
+            "Hunspell Accuracy": hun_accuracy,
+            "Hunspell Specificity": hun_specificity,
+
+        }
+    }
+    for key, value in result_dict.items():
+        if isinstance(value, dict):
+            for k, v in value.items():
+                print(k, ":", v)
+        else:
+            print(key, ":", value)
+
+def get_CorrectWords(data, checker):
+    '''
+    Calculate the % of correct edits done by the checker
+    :param data: dataset
+    :param checker: checker to evaluate
+    :return: % correct, rounded to two digits and df of correct entries
+    '''
+
+    # get entries that are corrected right by both checker
+    correct_entries = data[data['Match-Type'] == 1.0]
+    all_data_size = len(data.index)
+
+    if checker.lower() == "word":
+        only_word = data[data["Match-Type"] == 2.0]  # append word_correct rows
+        correct_entries = correct_entries.append(only_word)
+    elif checker.lower() == "hun" or checker.lower() == "hunspell":
+        correct_entries = correct_entries.append(data[data["Match-Type"] == 3.0])  # append hun_correct rows
+    else:
+        print("please enter a valid checker name to get percent correct")
+
+    # calculate %
+    correct_entries_size = len(correct_entries.index)
+    percent_correct = (correct_entries_size / all_data_size) * 100
+    return round(percent_correct, 2), correct_entries
+
+def get_FalseWords(data, checker):
+    '''
+    Calculate the % of false matches
+    :param data: dataset
+    :param checker: checker to evaluate
+    :return: % false and df of false entries
+    '''
+    # get all entries that are false (both or different)
+    false_entries = data[data["Match-Type"] == 4.0]
+    false_entries= false_entries.append(data[data["Match-Type"] == 5.0])
+
+    all_data_size = len(data.index)
+
+    if checker.lower() == "word":
+        false_entries = false_entries.append(data[data["Match-Type"] == 3.0]) #append all hun_correct
+
+    elif checker.lower() == "hun" or checker.lower() == "hunspell":
+        false_entries = false_entries.append(data[data["Match-Type"] == 2.0]) #append all word_correct
+    else:
+        print("please enter a valid checker name to get percent false")
+
+    false_entries_size = len(false_entries.index)
+    percent_false = (false_entries_size / all_data_size) * 100
+
+
+    return round(percent_false, 2), false_entries
+
+def calculate_accuracy(data, checker):
+    true_pos = get_truePos(data, checker)
+    true_neg = get_trueNeg(data, checker)
+
+    accuracy = (len(true_pos.index) + len(true_neg.index)) / \
+               (len(data.index))
+
+    return round(accuracy, 2)
+
+def calculate_specifictiy(data, checker):
+    true_neg = get_trueNeg(data, checker)
+    false_pos = get_truePos(data, checker)
+
+    specificity = len(true_neg.index) / (len(true_neg.index) + len(false_pos.index))
+
+    return round(specificity, 2)
+
+def calculate_recall(data, checker):
+    true_Pos = get_truePos(data, checker)
+    false_Neg = get_falseNeg(data, checker)
+
+    recall = len(true_Pos.index)/(len(true_Pos.index) + len(false_Neg.index))
+    return round(recall, 2)
+
+def calculate_precision(data, checker):
+    true_Pos = get_truePos(data, checker)
+    false_Pos = get_falsePos(data, checker)
+
+    precision = len(true_Pos.index) / (len(true_Pos.index) + len(false_Pos.index))
+    return round(precision, 2)
+
+
+def calculate_fScore(data, checker):
+    recall = calculate_recall(data, checker)
+    precision = calculate_precision(data, checker)
+    try:
+        f_score = 2 * ((precision * recall) / (precision + recall))
+    except ZeroDivisionError:
+        f_score = 0
+    return round(f_score,2)
+
+
+
+def get_truePos(data, checker):
+    '''
+    returns a dataframe containing all true positive corrections
+    -> correct
+    -> + correct of checker to evaluate
+    -> + original != gold (a change has been done)
+    :param data: dataframe containing the evaluation of the checkers
+    :param checker: which checker to get true positives for
+    :return: dataframe with the true positives
+    '''
+
+    #get all correctly checked words
+    _, true_pos = get_CorrectWords(data, checker)
+
+    # filter out unchanged words (those would be true negatives)
+    true_pos = true_pos[true_pos["Error"] == 1.0]
+    return true_pos
+
+def get_trueNeg(data, checker):
+    '''
+    returns a dataframe containing all true negative corrections
+    -> correct
+    -> + correct of checker to evaluate
+    -> + original = gold (no change has been done)
+    :param data: dataframe containing the evaluation of the checkers
+    :param checker: which checker to get true negatives for
+    :return: dataframe with the true negatives
+    '''
+
+    #get all correctly checked words
+    _, true_neg = get_CorrectWords(data, checker)
+    # filter out changed words (those would be true positives)
+    true_neg = true_neg[true_neg["Error"] != 1.0]
+    return true_neg
+
+
+def get_falsePos(data, checker):
+    '''
+    returns false positives for the specified checker
+    -> False
+    -> + the other checker correct (implies not both false/true but the checker has to be false)
+    -> + orginal = gold (should not have been changed)
+    :param data: whole dataframe with evaluation data
+    :param checker: checker to evaluate
+    :return: dataframe of false Positives
+    '''
+    _, false_pos = get_FalseWords(data, checker)
+    false_pos = false_pos[false_pos["Error"] != 1.0]
+    return false_pos
+
+def get_falseNeg(data, checker):
+    '''
+    returns false negatives for the specified checker
+    -> False
+    -> + the other checker correct (implies not both false/true but the checker has to be false)
+    -> + orginal != gold (should have been changed, but wasn't)
+    :param data: whole dataframe with evaluation data
+    :param checker: checker to evaluate
+    :return: dataframe of false Positives
+    '''
+    _, false_neg = get_FalseWords(data, checker)
+    false_neg = false_neg[false_neg["Error"] == 1.0]
+    return false_neg
+

@@ -78,4 +78,4 @@ if __name__ == '__main__':
 
     # ------------------------ READ IN THE MANUALLY EDITED FILE ---------------------------------------------
     manual_data = pd.read_csv("Results/Many_Errors_noDuplicates_Lena.csv", delimiter=",", header=0, encoding="utf-8")
-    print(manual_data.head())
+    Manual_Evaluation.manual_evaluation_results(manual_data)

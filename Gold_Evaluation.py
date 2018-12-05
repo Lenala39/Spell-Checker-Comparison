@@ -367,7 +367,7 @@ def get_percentCorrect(data, checker):
     '''
 
     # get entries that are corrected right by both checker
-    correct_entries = data[data["Match-Type"] == 0]
+    correct_entries = data[data['Match-Type'] == 0]
     all_data_size = len(data.index)
 
     if checker == "word":
@@ -392,7 +392,7 @@ def get_percentFalse(data, checker):
     '''
     # get all entries that are false (both or different)
     false_entries = data[data["Match-Type"] == 3]
-    false_entries.append(data[data["Match-Type"] == 4])
+    false_entries = false_entries.append(data[data["Match-Type"] == 4])
     all_data_size = len(data.index)
 
     if checker == "word":
