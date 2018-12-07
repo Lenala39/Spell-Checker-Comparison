@@ -210,15 +210,11 @@ def manual_evaluation_results(data):
     assert (round(word_P_false + word_P_correct, 0)) == 100.0
     assert (round(hun_P_false + hun_P_correct, 0)) == 100.0
 
-    hun_recall = calculate_recall(data, "hun")
     hun_precision = calculate_precision(data, "hun")
-    hun_fscore = calculate_fScore(data, "hun")
     hun_accuracy = calculate_accuracy(data, "hun")
     hun_specificity = calculate_specifictiy(data, "hun")
 
-    word_recall = calculate_recall(data, "word")
     word_precision = calculate_precision(data, "word")
-    word_fscore = calculate_fScore(data, "word")
     word_accuracy = calculate_accuracy(data, "word")
     word_specificity = calculate_specifictiy(data, "word")
 
@@ -228,18 +224,14 @@ def manual_evaluation_results(data):
         "Word": {
             "Word % correct" :word_P_correct,
             "Word % false": word_P_false,
-            "Word recall": word_recall,
             "Word precision": word_precision,
-            "Word FScore": word_fscore,
             "Word Accuracy": word_accuracy,
             "Word specificity": word_specificity,
         },
         "Hunspell": {
             "Hunspell % correct" :hun_P_correct,
             "Hunspell % false": hun_P_false,
-            "Hunspell recall": hun_recall,
             "Hunspell precision": hun_precision,
-            "Hunspell FScore": hun_fscore,
             "Hunspell Accuracy": hun_accuracy,
             "Hunspell Specificity": hun_specificity,
 
@@ -251,6 +243,19 @@ def manual_evaluation_results(data):
                 print(k, ":", v)
         else:
             print(key, ":", value)
+
+    filename = 'Results/results_Many.csv'
+    with open(filename, 'w') as csv_file:
+        writer = csv.writer(csv_file)
+        for key, value in result_dict.items():
+            # get nested dict output
+            if isinstance(value, dict):
+                for nested_key, nested_value in value.items():
+                    writer.writerow([nested_key, nested_value])
+            else:
+                writer.writerow([key, value])
+    print("Writing statistics about unfound errors into {} - Done!".format(filename))
+
 
 def get_CorrectWords(data, checker):
     '''
@@ -321,30 +326,12 @@ def calculate_specifictiy(data, checker):
 
     return round(specificity, 2)
 
-def calculate_recall(data, checker):
-    true_Pos = get_truePos(data, checker)
-    false_Neg = get_falseNeg(data, checker)
-
-    recall = len(true_Pos.index)/(len(true_Pos.index) + len(false_Neg.index))
-    return round(recall, 2)
-
 def calculate_precision(data, checker):
     true_Pos = get_truePos(data, checker)
     false_Pos = get_falsePos(data, checker)
 
     precision = len(true_Pos.index) / (len(true_Pos.index) + len(false_Pos.index))
     return round(precision, 2)
-
-
-def calculate_fScore(data, checker):
-    recall = calculate_recall(data, checker)
-    precision = calculate_precision(data, checker)
-    try:
-        f_score = 2 * ((precision * recall) / (precision + recall))
-    except ZeroDivisionError:
-        f_score = 0
-    return round(f_score,2)
-
 
 
 def get_truePos(data, checker):

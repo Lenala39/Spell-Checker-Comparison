@@ -61,7 +61,7 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
                             if g_words[j] == h_words[j]:
                                 if g_words[j] == w_words[j]:
                                     # both correct
-                                    type = MatchType.MatchType(0)
+                                    type = 1
                                     # all Levenshteins are 0
                                     lev_hg = 0
                                     lev_wg = 0
@@ -69,14 +69,14 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
                                     lev_og = Levenshtein.distance(g_words[j], o_words[j])
                                 elif g_words[j] != w_words[j]:
                                     # only hun correct
-                                    type = MatchType.MatchType(1)
+                                    type = 3
                                     lev_hg = Levenshtein.distance(g_words[j], h_words[j])
                                     lev_wg = Levenshtein.distance(g_words[j], w_words[j])
                                     lev_hw = Levenshtein.distance(g_words[j], h_words[j])
                                     lev_og = Levenshtein.distance(g_words[j], o_words[j])
                             elif g_words[j] == w_words[j]:
                                 # only word correct
-                                type = MatchType.MatchType(2)
+                                type = 2
                                 lev_hg = Levenshtein.distance(g_words[j], h_words[j])
                                 lev_wg = Levenshtein.distance(g_words[j], w_words[j])
                                 lev_hw = Levenshtein.distance(g_words[j], h_words[j])
@@ -84,14 +84,14 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
                             else:
                                 if w_words[j] == h_words[j]:
                                     # both false, but same
-                                    type = MatchType.MatchType(3)
+                                    type = 4
                                     lev_hg = Levenshtein.distance(g_words[j], h_words[j])
                                     lev_wg = Levenshtein.distance(g_words[j], w_words[j])
                                     lev_hw = Levenshtein.distance(g_words[j], h_words[j])
                                     lev_og = Levenshtein.distance(g_words[j], o_words[j])
                                 else:
                                     # both false but different
-                                    type = MatchType.MatchType(4)
+                                    type = 5
                                     lev_hg = Levenshtein.distance(g_words[j], h_words[j])
                                     lev_wg = Levenshtein.distance(g_words[j], w_words[j])
                                     lev_hw = Levenshtein.distance(g_words[j], h_words[j])
@@ -105,7 +105,7 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
                                 error = True
                             test_dict = {"Comment-ID": i+1,
                                          "Word-ID": j,
-                                         "Match-Type": type.value,
+                                         "Match-Type": type,
                                          "Error": error,
                                          "Original": o_words[j],
                                          "Gold": g_words[j],
@@ -171,7 +171,7 @@ def write_evalFile(data):
                     }
     }
     # write output to csv
-    filename = "Results/results.csv"
+    filename = "Results/results200.csv"
     with open(filename, 'a') as csv_file:
         writer = csv.writer(csv_file)
         for key, value in output_dict.items():
@@ -206,7 +206,7 @@ def gold_eval(data):
             "% hun unrecognized": hun_percent
         }
     }
-    filename = 'Results/results.csv'
+    filename = 'Results/results200.csv'
     with open(filename, 'a') as csv_file:
         writer = csv.writer(csv_file)
         for key, value in output_dict.items():
@@ -291,14 +291,14 @@ def get_falseWords(data, checker):
     :return: data with all false words
     '''
 
-    false_data = data[data["Match-Type"] == 3]     # false but the same
-    false_data.append(data[data["Match-Type"] == 4])    # false but different
+    false_data = data[data["Match-Type"] == 4]     # false but the same
+    false_data = false_data.append(data[data["Match-Type"] == 5])    # false but different
 
     #false words
     if checker == "hun":
-        false_data.append(data[data["Match-Type"] == 2]) # append only word correct (implies hun is false)
+        false_data = false_data.append(data[data["Match-Type"] == 2]) # append only word correct (implies hun is false)
     elif checker == "word":
-        false_data.append(data[data["Match-Type"] == 1]) # append only hun correct (implies word is false)
+        false_data = false_data.append(data[data["Match-Type"] == 3]) # append only hun correct (implies word is false)
     else:
         print("Please enter a valid checker option to receive true positives")
         return
@@ -314,12 +314,12 @@ def get_correctWords(data, checker):
     '''
 
     # correct data
-    correctData = data[data["Match-Type"] == 0]
+    correctData = data[data["Match-Type"] == 1]
     # append either the only hun/word correct to all correct ones
     if checker == "hun":
-        correctData.append(data[data["Match-Type"] == 1])
+        correctData = correctData.append(data[data["Match-Type"] == 3])
     elif checker == "word":
-        correctData.append(data[data["Match-Type"] == 2])
+        correctData = correctData.append(data[data["Match-Type"] == 2])
     else:
         print("Please enter a valid checker option to receive true positives")
         return
@@ -367,14 +367,14 @@ def get_percentCorrect(data, checker):
     '''
 
     # get entries that are corrected right by both checker
-    correct_entries = data[data['Match-Type'] == 0]
+    correct_entries = data[data['Match-Type'] == 1]
     all_data_size = len(data.index)
 
     if checker == "word":
         only_word = data[data["Match-Type"] == 2] # append word_correct rows
         correct_entries = correct_entries.append(only_word)
     elif checker == "hun":
-        correct_entries = correct_entries.append(data[data["Match-Type"] == 1]) # append hun_correct rows
+        correct_entries = correct_entries.append(data[data["Match-Type"] == 3]) # append hun_correct rows
     else:
         print("please enter a valid checker name to get percent correct")
 
@@ -391,12 +391,12 @@ def get_percentFalse(data, checker):
     :return: % false
     '''
     # get all entries that are false (both or different)
-    false_entries = data[data["Match-Type"] == 3]
-    false_entries = false_entries.append(data[data["Match-Type"] == 4])
+    false_entries = data[data["Match-Type"] == 4]
+    false_entries = false_entries.append(data[data["Match-Type"] == 5])
     all_data_size = len(data.index)
 
     if checker == "word":
-        false_entries = false_entries.append(data[data["Match-Type"] == 1]) #append all hun_correct
+        false_entries = false_entries.append(data[data["Match-Type"] == 3]) #append all hun_correct
     elif checker == "hun":
         false_entries = false_entries.append(data[data["Match-Type"] == 2]) #append all word_correct
     else:
