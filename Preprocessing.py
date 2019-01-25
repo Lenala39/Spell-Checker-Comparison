@@ -144,29 +144,3 @@ def get_unchanged_sameChange(original_folder, hunspell_folder, word_folder, gold
 
 
         return to_delete_unchanged, to_delete_sameChange
-
-
-def delete_files(path_list, status="none"):
-    '''
-    iterate over all file(paths) in to_delete and delete the files
-    :param path_list: list of file paths
-    :param status: why the file needed to be deleted
-    '''
-    with open("Deleted_Files.txt", "a") as file:
-        try:
-            file.write(status)
-        except:
-            pass
-        file.write("\n")
-        file.write("\n".join(path_list))
-        file.write(str(len(path_list)))
-
-    if len(path_list) is 0:
-        print("no files to delete because of: ", status)
-    else:
-        print("deleted because: ", status)
-        for path in path_list:
-            print("deleting: ", path)
-            os.unlink(path)
-    print("Deleting unchanged files - Done!")
-
