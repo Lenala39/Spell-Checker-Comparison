@@ -3,7 +3,6 @@ import Preprocessing
 import Apply_Hunspell
 import Reduce
 import Gold_Evaluation
-import MatchType
 import Manual_Evaluation
 import itertools
 import pandas as pd

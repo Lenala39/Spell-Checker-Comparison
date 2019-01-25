@@ -4,8 +4,6 @@ import Levenshtein
 import pandas as pd
 import numpy as np
 
-import MatchType
-
 def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
     '''
     Compares the files in the four input folders
