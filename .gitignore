@@ -2,10 +2,16 @@
 /Files
 /__pycache__
 /.idea
+/Test_Files
+/venv
+/BA_Struktur
+/Many_Files
+/.pytest_cache
+/Results/results200.csv
+Unused_Methods.py
 README.txt
 Database_schema.md
 out.txt
 corpus.sqlite3
 results.txt
 data.csv
-Unused_Methods.py

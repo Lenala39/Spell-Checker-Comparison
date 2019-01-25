@@ -1,0 +1,14 @@
+Word % correct,62.57
+Word % false,37.43
+Word recall,0.58
+Word precision,0.85
+Word FScore,0.69
+Word Accuracy,0.63
+Word specificity,0.33
+Hunspell % correct,44.84
+Hunspell % false,55.16
+Hunspell recall,0.57
+Hunspell precision,0.62
+Hunspell FScore,0.59
+Hunspell Accuracy,0.45
+Hunspell Specificity,0.09
