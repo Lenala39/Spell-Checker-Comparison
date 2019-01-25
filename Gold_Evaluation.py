@@ -7,12 +7,24 @@ import numpy as np
 import MatchType
 
 def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
-    # create lists of all files in the folders (for original need to filter out subdirs
+    '''
+    Compares the files in the four input folders
+    Each single word is taken and compared to the other corresponding words
+    :param original_folder: Folder containing the original files
+    :param hunspell_folder: Folder containing the files corrected by Hunspell
+    :param word_folder: Folder containing the files corrected by MS Word
+    :param gold_folder: Folder containing the gold-standard files that were manually edited
+    :return: full_data=pandas.DataFrame containing each word and some data about it (matchtype etc.)
+    '''
+
+    # create lists of all files in the folders
+    # for the original folder: need to filter out subdirs
     original_list = [f for f in os.listdir(original_folder) if os.path.isfile(os.path.join(original_folder, f))]
     hunspell_list = os.listdir(hunspell_folder)
     word_list = os.listdir(word_folder)
     gold_list = os.listdir(gold_folder)
 
+    # sort the lists so that the corresponding files will be compared
     original_list.sort()
     hunspell_list.sort()
     gold_list.sort()
@@ -27,8 +39,8 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
                              columns=["Comment-ID", "Word-ID", "Match-Type", "Error", "Original", "Gold", "Hunspell",
                                       "Word", "lev_hg", "lev_wg", "lev_hw", "lev_og"])
 
+    # iterate over length of one directory-list (others should be equally long)
     for i in range(0, len(word_list)):
-    #for i in range(len(hunspell_list)):
         #create a path for all of the files
         o_path = os.path.join(original_folder, original_list[i])
         h_path = os.path.join(hunspell_folder, hunspell_list[i])
@@ -38,6 +50,7 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
         # open the files
         with open(o_path, "r", encoding="utf-8") as original_file:
             with open(h_path, "r", encoding="utf-8") as hunspell_file:
+                # word file needs different encoding: Windows Western European
                 with open(w_path, "r", encoding="cp1252") as word_file:
                     with open(g_path, "r", encoding="utf-8") as gold_file:
 
@@ -47,27 +60,30 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
                         w_content = word_file.read()
                         g_content = gold_file.read()
 
+                        # get a list of the single words by splitting at the \n
                         o_words = o_content.split("\n")
                         h_words = h_content.split("\n")
                         w_words = w_content.split("\n")
                         g_words = g_content.split("\n")
 
+                        # init the variables
                         type = ""
                         lev_hg = 0
                         lev_wg = 0
                         lev_hw = 0
+
+                        # get length of word list for one of them (all should be equally long)
                         for j in range(len(o_words)):
-                            #id = str(i+1) + "." + str(j)
-                            if g_words[j] == h_words[j]:
-                                if g_words[j] == w_words[j]:
+                            if g_words[j] == h_words[j]: # compare gold and hunspell
+                                if g_words[j] == w_words[j]: # compare gold and word
                                     # both correct
                                     type = 1
                                     # all Levenshteins are 0
                                     lev_hg = 0
                                     lev_wg = 0
                                     lev_hw = 0
-                                    lev_og = Levenshtein.distance(g_words[j], o_words[j])
-                                elif g_words[j] != w_words[j]:
+                                    lev_og = Levenshtein.distance(g_words[j], o_words[j]) # gold changed from original?
+                                elif g_words[j] != w_words[j]: # compare gold and word
                                     # only hun correct
                                     type = 3
                                     lev_hg = Levenshtein.distance(g_words[j], h_words[j])
@@ -81,7 +97,7 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
                                 lev_wg = Levenshtein.distance(g_words[j], w_words[j])
                                 lev_hw = Levenshtein.distance(g_words[j], h_words[j])
                                 lev_og = Levenshtein.distance(g_words[j], o_words[j])
-                            else:
+                            else: # hunspell and word both != gold
                                 if w_words[j] == h_words[j]:
                                     # both false, but same
                                     type = 4
@@ -103,7 +119,9 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
                                 error = False
                             else:
                                 error = True
-                            test_dict = {"Comment-ID": i+1,
+
+                            #create python dict containing the values for the DataFrame columns
+                            comment_output = {"Comment-ID": i+1,
                                          "Word-ID": j,
                                          "Match-Type": type,
                                          "Error": error,
@@ -116,8 +134,11 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
                                          "lev_hw": lev_hw,
                                          "lev_og": lev_og}
 
-                            one_word = pd.Series(test_dict)
+                            #create a Series (pandas) from the dict
+                            one_word = pd.Series(comment_output)
+                            #set the jth row of the DataFrame data with the content of the Series one_word
                             data.loc[j] = one_word
+        # append data to full data
         full_data = full_data.append(data)
 
     return full_data
@@ -150,8 +171,17 @@ def write_evalFile(data):
     word_specificity = calculate_Specificity(data, "word")
     hun_specificity = calculate_Specificity(data, "hun")
 
-    # write all elements into dict
+    # GET UNRECOGNIZED ERRORS
+    only_errors = data[data["Error"] == 1]
+    data_size = len(only_errors.index)
+    # Hunspell and Word did not differ from Original Word
+    hun_unrecognized = only_errors[only_errors["Original"] == only_errors["Hunspell"]]
+    word_unrecognized = only_errors[only_errors["Original"] == only_errors["Word"]]
 
+    hun_percent = round(len(hun_unrecognized.index) / data_size * 100, 2)
+    word_percent = round(len(word_unrecognized.index) / data_size * 100, 2)
+
+    # write all elements into dict
     output_dict = {"Word":{
                         "Word_Percent_correct" : word_percentCorrect,
                         "Word_Percent_false": word_percentFalse,
@@ -159,7 +189,10 @@ def write_evalFile(data):
                         "Word_Recall": word_recall,
                         "Word_Fscore": word_fscore,
                         "Word_accuracy": word_accuracy,
-                        "Word_specificity": word_specificity},
+                        "Word_specificity": word_specificity,
+                        "# word unrecognized": len(word_unrecognized.index),
+                        "% word unrecognized": word_percent
+                    }
                     "Hun": {
                         "Hun_Percent_correct": hun_percentCorrect,
                         "Hun_Percent_false": hun_percentFalse,
@@ -168,6 +201,8 @@ def write_evalFile(data):
                         "Hun_Fscore": hun_fscore,
                         "Hun_accuracy": hun_accuracy,
                         "Hun_specificity": hun_specificity,
+                        "# hunspell unrecognized": len(hun_unrecognized.index),
+                        "% hun unrecognized": hun_percent
                     }
     }
     # write output to csv
@@ -182,41 +217,6 @@ def write_evalFile(data):
             else:
                 writer.writerow([key, value])
     print("Writing precision, fscore and more into evaluation file {} - Done!".format(filename))
-
-def gold_eval(data):
-    only_errors = data[data["Error"] == 1]
-    #print(only_errors)
-
-    data_size = len(only_errors.index)
-
-    hun_unrecognized = only_errors[only_errors["Original"] == only_errors["Hunspell"]]
-    word_unrecognized = only_errors[only_errors["Original"] == only_errors["Word"]]
-
-    hun_percent = round(len(hun_unrecognized.index) / data_size * 100,2)
-    word_percent = round(len(word_unrecognized.index) / data_size * 100, 2)
-
-    output_dict = {
-        "All errors": data_size,
-        "Word": {
-            "# word unrecognized": len(word_unrecognized.index),
-            "% word unrecognized": word_percent,
-        },
-        "Hunspell": {
-            "# hunspell unrecognized": len(hun_unrecognized.index),
-            "% hun unrecognized": hun_percent
-        }
-    }
-    filename = 'Results/results200.csv'
-    with open(filename, 'a') as csv_file:
-        writer = csv.writer(csv_file)
-        for key, value in output_dict.items():
-            # get nested dict output
-            if isinstance(value, dict):
-                for nested_key, nested_value in value.items():
-                    writer.writerow([nested_key, nested_value])
-            else:
-                writer.writerow([key, value])
-    print("Writing statistics about unfound errors into {} - Done!".format(filename))
 
 
 def get_truePos(data, checker):

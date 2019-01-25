@@ -1,6 +1,6 @@
-import re
-import os
-import filecmp
+import re #regex used for substituting double space with single one
+import os #used for getting list of files in dir
+import filecmp #used to compare files
 
 # ---------------------- general preprocessing -----------------------------
 def remove_special_chars(data, folder):
@@ -9,14 +9,13 @@ def remove_special_chars(data, folder):
     :param data: list of data tuples with comments
     :return: list of comments (no metadata)
     '''
-    new_data = []
+    # iterate over data
     for i in range(len(data)):
-        text = data[i][7]
-        if text is not None:
-            text = replace_chars(text)
-            text = add_crlf(text)
-            new_data.append(text)
-            write_file(text, data[i][0], folder)
+        text = data[i][7] #for each comment in data, only 7 contains text body
+        if text is not None: #text non-empty
+            text = replace_chars(text) #function to replace special characters
+            text = add_crlf(text) #get format of one word per line
+            write_file(text, data[i][0], folder) # write each file
     print("Removing special characters - Done!")
 
 
@@ -39,6 +38,7 @@ def replace_chars(text):
     text = text.replace("€", " ")
     text = text.replace("\"", " ")
     text = text.replace('"', " ")
+
     text = text.replace(u'\u201e', "") #double low quotation marks
     text = text.replace(u"\u201C", "") #left double quotation marks
     text = text.replace(u"\u2013", "") #dash
@@ -51,8 +51,13 @@ def replace_chars(text):
     return text
 
 def add_crlf(text):
-    single_words = text.split(" ")
-    new_text = '\n'.join(single_words)
+    '''
+    takes text-string and substitutes each space with a CRLF
+    :param text: string
+    :return: string with space substituted by \n
+    '''
+    single_words = text.split(" ") # split string into words at space
+    new_text = '\n'.join(single_words) #re-join using \n
     return new_text
 
 def write_file(comment, id, folder):
@@ -165,23 +170,3 @@ def delete_files(path_list, status="none"):
             os.unlink(path)
     print("Deleting unchanged files - Done!")
 
-# ------------------------UNUSED---------------------------------------------
-def remove_but_keep_meta(data):
-    '''
-    removes the same metacharacters as the other function but keeps metadata like author ...
-    :param data: list of tuples with comments
-    :return: list of comments with metadata (tuple structure kept)
-    '''
-    for i in range(len(data)):
-        text = data[i][7]
-        if text is None:
-            pass
-        else:
-            text = replace_chars(text)
-
-        data[i] = list(data[i])
-        data[i][7] = text
-        write_file(text, data[i][0])
-
-    print("Removing special characters (keep metadata) - Done!")
-    return data

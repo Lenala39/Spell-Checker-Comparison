@@ -1,5 +1,4 @@
-import sqlite3
-
+import sqlite3 #accessing database
 
 def access_corpus(num_posts):
     '''
@@ -28,7 +27,7 @@ def access_corpus(num_posts):
             data.extend(new_data) # extend data with next comments
             empty_comments, to_be_deleted = check_for_empty_comments(data) # check for empty comments
     print("Accessing Database - Done!")
-    return data
+    return data #returns list
 
 def check_for_empty_comments(data):
     '''

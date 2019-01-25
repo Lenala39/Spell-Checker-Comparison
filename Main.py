@@ -18,10 +18,11 @@ if __name__ == '__main__':
     gold_folder = "C:\\Users\\Lena Langholf\\Dropbox\\Spell_Checking\\Files\\Gold"
     file_folder = "C:\\Users\\Lena Langholf\\Dropbox\\Spell_Checking\\Files"
 
-    '''    
-    # --------- DATABASE ACCESS + PROCESSING-----------------------
-    data = DB_access.access_corpus(2000)
 
+    # --------- DATABASE ACCESS + PROCESSING-----------------------
+    data = DB_access.access_corpus(5) #number specifies returned comments
+
+    '''   
     # process data and remove special chars + writes comments into individual files
     Preprocessing.remove_special_chars(data, folder=file_folder)
  
@@ -55,13 +56,12 @@ if __name__ == '__main__':
     data = Reduce.reduce(data)
     data.to_csv("Results/200_Errors.csv", index=False, encoding="utf-8", header=True)
 
-    '''
+    
     # ----------------WRITE EVALUATION FILES-----------------------------------------
     # write file containing fscore, precision, recall etc
     data = pd.read_csv("Results/200_Errors.csv", delimiter=",",
                        header=0, encoding="utf-8")
-    Gold_Evaluation.write_evalFile(data)
-    Gold_Evaluation.gold_eval(data)
+    Gold_Evaluation.write_evalFile(data) # recall etc
 
     # ------------------ PROCESS EVALUATION FILE--------------------------------------
 
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     results = results.drop_duplicates(keep="first")  # drop duplicate rows
     # write back to csv
     results.to_csv("Results/results200_noDuplicates.csv", index=False, encoding="utf-8")
-    '''    
+      
     # ------------------------EVAL WITHOUT GOLD - ONLY CSV OUTPUT FOR MANUAL PROCESSING--------------------
     Manual_Evaluation.corrections_toCSV(original_folder=original_folder, hunspell_folder=hunspell_folder,
                                         word_folder=word_folder, filename="Many_Errors.csv")

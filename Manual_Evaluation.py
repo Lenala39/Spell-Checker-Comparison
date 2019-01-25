@@ -218,8 +218,6 @@ def manual_evaluation_results(data):
     word_accuracy = calculate_accuracy(data, "word")
     word_specificity = calculate_specifictiy(data, "word")
 
-
-
     result_dict = {
         "Word": {
             "Word % correct" :word_P_correct,
@@ -291,7 +289,7 @@ def get_FalseWords(data, checker):
     '''
     # get all entries that are false (both or different)
     false_entries = data[data["Match-Type"] == 4.0]
-    false_entries= false_entries.append(data[data["Match-Type"] == 5.0])
+    false_entries = false_entries.append(data[data["Match-Type"] == 5.0])
 
     all_data_size = len(data.index)
 
