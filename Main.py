@@ -54,7 +54,7 @@ if __name__ == '__main__':
     # reduce data size
     data = Reduce.reduce(data)
     data.to_csv("Results/200_Errors.csv", index=False, encoding="utf-8", header=True)
-
+    
     
     # ----------------WRITE EVALUATION FILES-----------------------------------------
     # write file containing fscore, precision, recall etc
@@ -64,11 +64,12 @@ if __name__ == '__main__':
 
     # ------------------ PROCESS EVALUATION FILE--------------------------------------
 
-    results = pd.read_csv("Results/results200.csv", delimiter=",", header=None, encoding="utf-8")  # import from csv
+    results = pd.read_csv("Results/Results200.csv", delimiter=",", header=None, encoding="utf-8")  # import from csv
     results = results.drop_duplicates(keep="first")  # drop duplicate rows
     # write back to csv
-    results.to_csv("Results/results200_noDuplicates.csv", index=False, encoding="utf-8")
-      
+    results.to_csv("Results/Results200.csv", index=False, encoding="utf-8")
+
+    
     # ------------------------EVAL WITHOUT GOLD - ONLY CSV OUTPUT FOR MANUAL PROCESSING--------------------
     Manual_Evaluation.corrections_toCSV(original_folder=original_folder, hunspell_folder=hunspell_folder,
                                         word_folder=word_folder, filename="Many_Errors.csv")
@@ -76,8 +77,15 @@ if __name__ == '__main__':
     # dropping duplicate lines in csv file
     Manual_Evaluation.drop_duplicate_rows_from_csv("Results/Many_Errors.csv")
     
-
+    '''
     # ------------------------ READ IN THE MANUALLY EDITED FILE ---------------------------------------------
     manual_data = pd.read_csv("Results/Many_Errors_noDuplicates_Lena.csv", delimiter=",", header=0, encoding="utf-8")
     Manual_Evaluation.manual_evaluation_results(manual_data)
-    '''
+
+    # remove duplicate lines (empty ones)
+    results_many = pd.read_csv("Results/ResultsMany.csv", delimiter=",", header=None, encoding="utf-8")  # import from csv
+    results_many = results_many.drop_duplicates(keep="first")  # drop duplicate rows
+    # write back to csv
+    results_many.to_csv("Results/ResultsMany.csv", index=False, encoding="utf-8")
+
+

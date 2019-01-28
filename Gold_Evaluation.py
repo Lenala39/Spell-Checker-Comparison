@@ -190,7 +190,7 @@ def write_evalFile(data):
                         "Word_specificity": word_specificity,
                         "# word unrecognized": len(word_unrecognized.index),
                         "% word unrecognized": word_percent
-                    }
+                    },
                     "Hun": {
                         "Hun_Percent_correct": hun_percentCorrect,
                         "Hun_Percent_false": hun_percentFalse,
@@ -204,8 +204,8 @@ def write_evalFile(data):
                     }
     }
     # write output to csv
-    filename = "Results/results200.csv"
-    with open(filename, 'a') as csv_file:
+    filename = "Results/Results200.csv"
+    with open(filename, 'w') as csv_file:
         writer = csv.writer(csv_file)
         for key, value in output_dict.items():
             # get nested dict output

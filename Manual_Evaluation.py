@@ -210,30 +210,15 @@ def manual_evaluation_results(data):
     assert (round(word_P_false + word_P_correct, 0)) == 100.0
     assert (round(hun_P_false + hun_P_correct, 0)) == 100.0
 
-    hun_precision = calculate_precision(data, "hun")
-    hun_accuracy = calculate_accuracy(data, "hun")
-    hun_specificity = calculate_specifictiy(data, "hun")
-
-    word_precision = calculate_precision(data, "word")
-    word_accuracy = calculate_accuracy(data, "word")
-    word_specificity = calculate_specifictiy(data, "word")
-
     result_dict = {
         "Word": {
             "Word % correct" :word_P_correct,
             "Word % false": word_P_false,
-            "Word precision": word_precision,
-            "Word Accuracy": word_accuracy,
-            "Word specificity": word_specificity,
-        },
+            },
         "Hunspell": {
             "Hunspell % correct" :hun_P_correct,
             "Hunspell % false": hun_P_false,
-            "Hunspell precision": hun_precision,
-            "Hunspell Accuracy": hun_accuracy,
-            "Hunspell Specificity": hun_specificity,
-
-        }
+            }
     }
     for key, value in result_dict.items():
         if isinstance(value, dict):
@@ -242,7 +227,7 @@ def manual_evaluation_results(data):
         else:
             print(key, ":", value)
 
-    filename = 'Results/results_Many.csv'
+    filename = 'Results/ResultsMany.csv'
     with open(filename, 'w') as csv_file:
         writer = csv.writer(csv_file)
         for key, value in result_dict.items():
@@ -306,7 +291,7 @@ def get_FalseWords(data, checker):
 
 
     return round(percent_false, 2), false_entries
-
+'''
 def calculate_accuracy(data, checker):
     true_pos = get_truePos(data, checker)
     true_neg = get_trueNeg(data, checker)
@@ -330,7 +315,7 @@ def calculate_precision(data, checker):
 
     precision = len(true_Pos.index) / (len(true_Pos.index) + len(false_Pos.index))
     return round(precision, 2)
-
+'''
 
 def get_truePos(data, checker):
     '''
