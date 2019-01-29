@@ -197,6 +197,8 @@ def manual_evaluation_results(data):
     hun_P_false, _ = get_FalseWords(data, "hunspell")
     word_P_false, _ = get_FalseWords(data, "word")
 
+    hun_precision = calculate_precision(data, "hunspell")
+    word_precision = calculate_precision(data, "word")
     # assert that all entries have a MatchType
     # -1 because header is counted in the full index
     assert len(data.index)  == (len(data[data["Match-Type"] == 1.0].index)
@@ -214,10 +216,12 @@ def manual_evaluation_results(data):
         "Word": {
             "Word % correct" :word_P_correct,
             "Word % false": word_P_false,
+            "Word precision": word_precision,
             },
         "Hunspell": {
             "Hunspell % correct" :hun_P_correct,
             "Hunspell % false": hun_P_false,
+            "Hunspell precision": hun_precision,
             }
     }
     for key, value in result_dict.items():
@@ -308,14 +312,14 @@ def calculate_specifictiy(data, checker):
     specificity = len(true_neg.index) / (len(true_neg.index) + len(false_pos.index))
 
     return round(specificity, 2)
-
+'''
 def calculate_precision(data, checker):
     true_Pos = get_truePos(data, checker)
     false_Pos = get_falsePos(data, checker)
 
     precision = len(true_Pos.index) / (len(true_Pos.index) + len(false_Pos.index))
     return round(precision, 2)
-'''
+
 
 def get_truePos(data, checker):
     '''

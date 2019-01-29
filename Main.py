@@ -19,9 +19,10 @@ if __name__ == '__main__':
 
 
     # --------- DATABASE ACCESS + PROCESSING-----------------------
+    '''   
     data = DB_access.access_corpus(5) #number specifies returned comments
 
-    '''   
+    
     # process data and remove special chars + writes comments into individual files
     Preprocessing.remove_special_chars(data, folder=file_folder)
  
@@ -77,7 +78,7 @@ if __name__ == '__main__':
     # dropping duplicate lines in csv file
     Manual_Evaluation.drop_duplicate_rows_from_csv("Results/Many_Errors.csv")
     
-    '''
+    
     # ------------------------ READ IN THE MANUALLY EDITED FILE ---------------------------------------------
     manual_data = pd.read_csv("Results/Many_Errors_noDuplicates_Lena.csv", delimiter=",", header=0, encoding="utf-8")
     Manual_Evaluation.manual_evaluation_results(manual_data)
@@ -87,5 +88,5 @@ if __name__ == '__main__':
     results_many = results_many.drop_duplicates(keep="first")  # drop duplicate rows
     # write back to csv
     results_many.to_csv("Results/ResultsMany.csv", index=False, encoding="utf-8")
-
+    '''
 
