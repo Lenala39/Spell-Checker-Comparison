@@ -1,0 +1,7 @@
+0,1
+Word % correct,62.57
+Word % false,37.43
+Word precision,0.85
+Hunspell % correct,44.84
+Hunspell % false,55.16
+Hunspell precision,0.62
