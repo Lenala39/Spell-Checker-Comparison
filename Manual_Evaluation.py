@@ -314,6 +314,12 @@ def calculate_specifictiy(data, checker):
     return round(specificity, 2)
 '''
 def calculate_precision(data, checker):
+    '''
+    calculates the precision of the checker
+    :param data: df of words
+    :param checker: hun or word
+    :return: value, rounded to 2 digits
+    '''
     true_Pos = get_truePos(data, checker)
     false_Pos = get_falsePos(data, checker)
 

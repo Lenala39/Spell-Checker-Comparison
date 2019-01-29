@@ -323,7 +323,7 @@ def get_correctWords(data, checker):
         return
     return correctData
 
-def calculate_recall(data, checker):
+def calculate_precision(data, checker):
     '''
     Calculate recall of the dataset
     :param data: dataset
@@ -339,7 +339,7 @@ def calculate_recall(data, checker):
         recall = 0
     return round(recall, 2)
 
-def calculate_precision(data, checker):
+def calculate_recall(data, checker):
     '''
     calculate precision of the dataset
     :param data: dataset

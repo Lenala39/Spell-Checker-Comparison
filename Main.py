@@ -41,7 +41,7 @@ if __name__ == '__main__':
     
     Preprocessing.delete_files(to_delete_un, "unchanged")
     Preprocessing.delete_files(to_delete_same, "same change")
-    
+    '''
     # -------------------EVAL WITH GOLD (AUTOMATIC)-------------------------------
     # evaluate and compare the files
     data = Gold_Evaluation.compare_files(original_folder=original_folder, hunspell_folder=hunspell_folder,
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     data = Reduce.reduce(data)
     data.to_csv("Results/200_Errors.csv", index=False, encoding="utf-8", header=True)
     
-    
+
     # ----------------WRITE EVALUATION FILES-----------------------------------------
     # write file containing fscore, precision, recall etc
     data = pd.read_csv("Results/200_Errors.csv", delimiter=",",
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     # write back to csv
     results.to_csv("Results/Results200.csv", index=False, encoding="utf-8")
 
-    
+    '''
     # ------------------------EVAL WITHOUT GOLD - ONLY CSV OUTPUT FOR MANUAL PROCESSING--------------------
     Manual_Evaluation.corrections_toCSV(original_folder=original_folder, hunspell_folder=hunspell_folder,
                                         word_folder=word_folder, filename="Many_Errors.csv")
