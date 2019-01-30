@@ -160,6 +160,7 @@ def manual_evaluation(data, filename):
     assert (round(hun_P_false + hun_P_correct, 0)) == 100.0
 
     result_dict = {
+        "Number of entries": len(data.index),
         "Word": {
             "Word % correct" :word_P_correct,
             "Word % false": word_P_false,
@@ -208,6 +209,7 @@ def manual_Eval_without_special_cases(data, filename):
     word_precision = calculate_precision(data, "word")
 
     result_dict = {
+        "Number of entries noSpecialCases": len(data.index),
         "Word": {
             "Word % correct noSpecialCases": word_P_correct,
             "Word % false noSpecialCases": word_P_false,

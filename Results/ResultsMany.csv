@@ -1,10 +1,12 @@
 0,1
+Number of entries,3147.0
 Word % correct,62.57
 Word % false,37.43
 Word precision,0.85
 Hunspell % correct,44.84
 Hunspell % false,55.16
 Hunspell precision,0.62
+Number of entries noSpecialCases,2180.0
 Word % correct noSpecialCases,62.89
 Word % false noSpecialCases,37.11
 Word precision noSpecialCases,0.9
