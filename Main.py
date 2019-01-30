@@ -4,7 +4,6 @@ import Apply_Hunspell
 import Reduce
 import Gold_Evaluation
 import Manual_Evaluation
-import itertools
 import pandas as pd
 
 if __name__ == '__main__':
@@ -19,7 +18,7 @@ if __name__ == '__main__':
 
 
     # --------- DATABASE ACCESS + PROCESSING-----------------------
-    '''   
+    '''
     data = DB_access.access_corpus(5) #number specifies returned comments
 
     
@@ -41,8 +40,8 @@ if __name__ == '__main__':
     
     Preprocessing.delete_files(to_delete_un, "unchanged")
     Preprocessing.delete_files(to_delete_same, "same change")
-    '''
-    # -------------------EVAL WITH GOLD (AUTOMATIC)-------------------------------
+    
+    # ------------------EVAL WITH GOLD (AUTOMATIC)-------------------------------
     # evaluate and compare the files
     data = Gold_Evaluation.compare_files(original_folder=original_folder, hunspell_folder=hunspell_folder,
                                          word_folder=word_folder, gold_folder=gold_folder)
@@ -61,7 +60,7 @@ if __name__ == '__main__':
     # write file containing fscore, precision, recall etc
     data = pd.read_csv("Results/200_Errors.csv", delimiter=",",
                        header=0, encoding="utf-8")
-    Gold_Evaluation.write_evalFile(data) # recall etc
+    Gold_Evaluation.write_eval_file(data) # recall etc
 
     # ------------------ PROCESS EVALUATION FILE--------------------------------------
 
@@ -70,7 +69,7 @@ if __name__ == '__main__':
     # write back to csv
     results.to_csv("Results/Results200.csv", index=False, encoding="utf-8")
 
-    '''
+    
     # ------------------------EVAL WITHOUT GOLD - ONLY CSV OUTPUT FOR MANUAL PROCESSING--------------------
     Manual_Evaluation.corrections_toCSV(original_folder=original_folder, hunspell_folder=hunspell_folder,
                                         word_folder=word_folder, filename="Many_Errors.csv")
@@ -80,13 +79,6 @@ if __name__ == '__main__':
     
     
     # ------------------------ READ IN THE MANUALLY EDITED FILE ---------------------------------------------
-    manual_data = pd.read_csv("Results/Many_Errors_noDuplicates_Lena.csv", delimiter=",", header=0, encoding="utf-8")
-    Manual_Evaluation.manual_evaluation_results(manual_data)
-
-    # remove duplicate lines (empty ones)
-    results_many = pd.read_csv("Results/ResultsMany.csv", delimiter=",", header=None, encoding="utf-8")  # import from csv
-    results_many = results_many.drop_duplicates(keep="first")  # drop duplicate rows
-    # write back to csv
-    results_many.to_csv("Results/ResultsMany.csv", index=False, encoding="utf-8")
     '''
-
+    manual_data = pd.read_csv("Results/Many_Errors_noDuplicates_Lena.csv", delimiter=",", header=0, encoding="utf-8")
+    Manual_Evaluation.get_results(data=manual_data, filename="Results/ResultsMany.csv")

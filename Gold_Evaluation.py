@@ -1,8 +1,8 @@
-import csv
+import csv #write csv-file from dict
 import os
 import Levenshtein
-import pandas as pd
-import numpy as np
+import pandas as pd # data is stored in pandas Dataframe
+import numpy as np #initialize dataframe
 
 def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
     '''
@@ -141,7 +141,7 @@ def compare_files(original_folder, hunspell_folder, word_folder, gold_folder):
 
     return full_data
 
-def write_evalFile(data):
+def write_eval_file(data):
     '''
     writes the evaluation file as csv-file (results.csv)
     :param data: dataset

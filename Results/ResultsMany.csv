@@ -5,3 +5,9 @@ Word precision,0.85
 Hunspell % correct,44.84
 Hunspell % false,55.16
 Hunspell precision,0.62
+Word % correct noSpecialCases,62.89
+Word % false noSpecialCases,37.11
+Word precision noSpecialCases,0.9
+Hunspell % correct noSpecialCases,59.95
+Hunspell % false noSpecialCases,40.05
+Hunspell precision noSpecialCases,0.78
