@@ -1,4 +1,4 @@
-left context,original word,right context,Error,Match-Type,word correction,hun correction,Abkürzung,Eigenname,URL/Email,Englisch,Österreichisch
+left context,original word,right context,Error,Match-Type,word correction,hun correction,Abkuerzung,Eigenname,URL/Email,Englisch,Oesterreichisch
 Als,RK,Freiwilliger,,2,RK,KRK,1,,,,
 frei,uswusf,damals,1,5,Usus,Auswurf,1,,,,
 menschenverachtendes,Sytem,der,1,1,System,System,,,,,
@@ -3621,3 +3621,4 @@ ahh,youth,-,1,2,youth,YouTube,,,,1,
 mein,profil,gerne,1,1,Profil,Profil,,,,,
 lauter,bäumen,nicht,1,3,bäumen,Bäumen,,,,,
 Abos,veränder,und,1,2,verändert,veränder,,,,,
+,,,,,,,,,,,

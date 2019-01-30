@@ -116,8 +116,12 @@ def get_results(data, filename="Results/ResultsMany.csv"):
     :param filename: file to write results in
     :return:
     '''
-    manual_evaluation(data, filename)
-    manual_Eval_without_special_cases(data, filename)
+    manual_evaluation(data, filename) #manual eval with all words (except Match-Type 0)
+    manual_Eval_without_special_cases(data, filename) #no special cases at all
+    manual_Eval_onlySingleCategory(data, "Abkuerzung", filename) # only abbreviaions
+    manual_Eval_onlySingleCategory(data, "Eigenname", filename) # only proper nouns
+    manual_Eval_onlySingleCategory(data, "Englisch", filename) #only English
+    manual_Eval_onlySingleCategory(data, "Oesterreichisch", filename) # only Austrian
 
     # remove duplicate lines (empty ones)
     results_many = pd.read_csv(filename, delimiter=",", header=None,
@@ -125,6 +129,7 @@ def get_results(data, filename="Results/ResultsMany.csv"):
     results_many = results_many.drop_duplicates(keep="first")  # drop duplicate rows
     # write back to csv
     results_many.to_csv(filename, index=False, encoding="utf-8")
+    print("Writing results of Manual Evaluation into {} - Done!".format(filename))
 
 
 def manual_evaluation(data, filename):
@@ -148,12 +153,13 @@ def manual_evaluation(data, filename):
     word_precision = calculate_precision(data, "word")
     # assert that all entries have a MatchType
     # -1 because header is counted in the full index
-    assert len(data.index)  == (len(data[data["Match-Type"] == 1.0].index)
+    assert len(data.index)-1  == (len(data[data["Match-Type"] == 1.0].index)
                                + len(data[data["Match-Type"] == 2.0].index)
                                + len(data[data["Match-Type"] == 3.0].index)
                                + len(data[data["Match-Type"] == 4.0].index)
                                + len(data[data["Match-Type"] == 5.0].index)
                                )
+
 
     # make sure that false and correct add up to 100%
     assert (round(word_P_false + word_P_correct, 0)) == 100.0
@@ -182,22 +188,20 @@ def manual_evaluation(data, filename):
                     writer.writerow([nested_key, nested_value])
             else:
                 writer.writerow([key, value])
-    print("Writing statistics about unfound errors into {} - Done!".format(filename))
 
 def manual_Eval_without_special_cases(data, filename):
     '''
-
-    :param data:
-    :return:
+    Removes all special categories like abbreviations and proper names from data
+    :param data: dataframe with all entries
     '''
     input_data = data
 
     data = data[data["Match-Type"] != 0]
     data = data[data["URL/Email"] != 1.0]
-    data = data[data["Abkürzung"] != 1.0]
+    data = data[data["Abkuerzung"] != 1.0]
     data = data[data["Eigenname"] != 1.0]
     data = data[data["Englisch"] != 1.0]
-    data = data[data["Österreichisch"] != 1.0]
+    data = data[data["Oesterreichisch"] != 1.0]
     assert len(data.index) < len(input_data.index)
 
     hun_P_correct, _ = get_CorrectWords(data, "hunspell")
@@ -231,7 +235,50 @@ def manual_Eval_without_special_cases(data, filename):
                     writer.writerow([nested_key, nested_value])
             else:
                 writer.writerow([key, value])
-    print("Writing statistics about unfound errors (no Special cases) into {} - Done!".format(filename))
+
+def manual_Eval_onlySingleCategory(data, category, filename):
+    '''
+    calculates %correct and precision only for one word-category like abbreviation etc.
+    :param data: dataframe containing all rows
+    :param category: Column-name for which the metrics should be calculated
+    :param filename: output filename
+    '''
+    # filter ONLY the words belonging to category
+    data = data[data[category] == 1.0]
+
+    # calculate metrics
+    hun_P_correct, _ = get_CorrectWords(data, "hunspell")
+    word_P_correct, _ = get_CorrectWords(data, "word")
+    hun_P_false, _ = get_FalseWords(data, "hunspell")
+    word_P_false, _ = get_FalseWords(data, "word")
+
+    hun_precision = calculate_precision(data, "hunspell")
+    word_precision = calculate_precision(data, "word")
+
+    # make result dict and format only$Category (onlyAbkuerzungen ...)
+    result_dict = {
+        "Number of entries only{}".format(category): len(data.index),
+        "Word": {
+            "Word % correct only{}".format(category): word_P_correct,
+            "Word % false only{}".format(category): word_P_false,
+            "Word precision only{}".format(category): word_precision,
+        },
+        "Hunspell": {
+            "Hunspell % correct only{}".format(category): hun_P_correct,
+            "Hunspell % false only{}".format(category): hun_P_false,
+            "Hunspell precision only{}".format(category): hun_precision,
+        }
+    }
+
+    with open(filename, 'a') as csv_file:
+        writer = csv.writer(csv_file)
+        for key, value in result_dict.items():
+            # get nested dict output
+            if isinstance(value, dict):
+                for nested_key, nested_value in value.items():
+                    writer.writerow([nested_key, nested_value])
+            else:
+                writer.writerow([key, value])
 
 
 def get_CorrectWords(data, checker):

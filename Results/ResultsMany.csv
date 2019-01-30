@@ -1,15 +1,43 @@
 0,1
-Number of entries,3147.0
-Word % correct,62.57
-Word % false,37.43
+Number of entries,3148.0
+Word % correct,62.55
+Word % false,37.42
 Word precision,0.85
-Hunspell % correct,44.84
-Hunspell % false,55.16
+Hunspell % correct,44.82
+Hunspell % false,55.15
 Hunspell precision,0.62
-Number of entries noSpecialCases,2180.0
-Word % correct noSpecialCases,62.89
-Word % false noSpecialCases,37.11
+Number of entries noSpecialCases,2181.0
+Word % correct noSpecialCases,62.86
+Word % false noSpecialCases,37.09
 Word precision noSpecialCases,0.9
-Hunspell % correct noSpecialCases,59.95
-Hunspell % false noSpecialCases,40.05
+Hunspell % correct noSpecialCases,59.93
+Hunspell % false noSpecialCases,40.03
 Hunspell precision noSpecialCases,0.78
+Number of entries onlyAbkuerzung,167.0
+Word % correct onlyAbkuerzung,74.85
+Word % false onlyAbkuerzung,22.75
+Word precision onlyAbkuerzung,0.79
+Hunspell % correct onlyAbkuerzung,7.78
+Hunspell % false onlyAbkuerzung,89.82
+Hunspell precision onlyAbkuerzung,0.1
+Number of entries onlyEigenname,395.0
+Word % correct onlyEigenname,57.22
+Word % false onlyEigenname,39.24
+Word precision onlyEigenname,0.4
+Hunspell % correct onlyEigenname,13.42
+Hunspell % false onlyEigenname,83.04
+Hunspell precision onlyEigenname,0.14
+Number of entries onlyEnglisch,372.0
+Word % correct onlyEnglisch,66.13
+Word % false onlyEnglisch,33.06
+Word precision onlyEnglisch,0.9
+Hunspell % correct onlyEnglisch,6.72
+Hunspell % false onlyEnglisch,92.47
+Hunspell precision onlyEnglisch,0.19
+Number of entries onlyOesterreichisch,124.0
+Word % correct onlyOesterreichisch,21.77
+Word % false onlyOesterreichisch,50.0
+Word precision onlyOesterreichisch,0.58
+Hunspell % correct onlyOesterreichisch,11.29
+Hunspell % false onlyOesterreichisch,60.48
+Hunspell precision onlyOesterreichisch,0.36
